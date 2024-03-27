@@ -3,17 +3,23 @@ package com.example.historyhike.model;
 import java.util.ArrayList;
 
 public class Quest {
-    private int questID;
+    private int id;
     private String title;
     private String description;
-    private Objective startingPoint;
     private ArrayList<Objective> questPath;
-    public int getQuestID() {
-        return questID;
+    private QuestState state; // Enum to hold quest states (NOT_STARTED, IN_PROGRESS & COMPLETED)
+
+    // Enum for QuestState
+    public enum QuestState {
+        NOT_STARTED, IN_PROGRESS, COMPLETED
     }
 
-    public void setQuestID(int questID) {
-        this.questID = questID;
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -32,23 +38,47 @@ public class Quest {
         this.description = description;
     }
 
-    public Objective getStartingPoint() {
-        return startingPoint;
+    public ArrayList<Objective> getQuestPath() {
+        return questPath;
     }
 
-    public void setStartingPoint(Objective startingPoint) {
-        this.startingPoint = startingPoint;
+    public void setQuestPath(ArrayList<Objective> questPath) {
+        this.questPath = questPath;
     }
 
-    // Will take a quest from my REST API and begin it. Will store it to allow it to be accessed offline
+    public QuestState getState() {
+        return state;
+    }
+
+    public void setState(QuestState state) {
+        this.state = state;
+    }
+
+    public Quest() {
+        this.questPath = new ArrayList<>();
+        this.state = QuestState.NOT_STARTED;
+    }
+
+    public Objective getCurrentObjective() {
+        // Return the first incomplete objective
+        for (Objective obj : questPath) {
+            if (!obj.isComplete()) {
+                return obj;
+            }
+        }
+        return null; // All objectives completed
+    }
+
     public void downloadAndStartQuest() {
+        // TODO: Will take a quest from my REST API and begin it. Will store it to allow it to be accessed offline. Maybe even download ALL quests, just not here...?
     }
 
-    // Will mark the quest as complete
     public void completeQuest() {
+        // TODO: Will mark the quest as complete. Possibly delete it?
     }
 
-    // Will cancel a quest, allowing the user to start a new one
+
     public void cancelQuest() {
+        // TODO: Will cancel a quest, allowing the user to start a new one. Possibly delete it?
     }
 }
