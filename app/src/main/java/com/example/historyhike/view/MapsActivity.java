@@ -1,44 +1,41 @@
 package com.example.historyhike.view;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.os.Bundle;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
-import android.content.pm.PackageManager;
-import android.os.Bundle;
-import android.Manifest;
-import android.widget.Toast;
-
 import com.example.historyhike.R;
+import com.example.historyhike.controller.GeolocationController;
 import com.example.historyhike.model.Geolocation;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.example.historyhike.databinding.ActivityMapsBinding;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, Geolocation.LocationUpdateListener {
 
     private GoogleMap mMap;
-    private final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-    private Geolocation geolocation; // Use THIS instance
+    private GeolocationController geolocationController;
+    private final int LOCATION_PERMISSION_REQUEST_CODE = 1000; // Must match LocationController
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        // Initialise Geolocation object
-        geolocation = new Geolocation(this);
+        Geolocation geolocation = new Geolocation();
+        geolocation.setLocationUpdateListener(this); // Set MapsActivity as the location listener
 
-        // Set the location listener
-        geolocation.setLocationUpdateListener(this);
+        geolocationController = new GeolocationController(this, geolocation);
 
-        // Asynchronously find the MapFragment from layout
+        // Find the map asynchronously
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
@@ -48,43 +45,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onResume() {
         super.onResume();
-        if (mMap != null && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            geolocation.startLocationUpdates();
+        // Check for permissions
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Request if denied
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        } else {
+            // Begin updating locations again
+            geolocationController.startLocationUpdates(this);
         }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        geolocation.stopLocationUpdates();
-    }
-
-
-    @Override
-    public void onLocationUpdated(double lat, double lon) {
-        // Update the map with the new location
-        if (mMap != null) { // Check if mMap is initialised
-            runOnUiThread(() -> {
-                LatLng currentLatLng = new LatLng(lat, lon);
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 15));
-                mMap.clear(); // Clear existing markers
-                mMap.addMarker(new MarkerOptions().position(currentLatLng).title("Current Location"));
-            });
-        }
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
-        // Check if location permission granted. If not, request it.
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
-            return;
-        }
-
-        // Enable location viewing on the map
-        mMap.setMyLocationEnabled(true);
+        // Pause location updates when app is closed
+        geolocationController.stopLocationUpdates();
     }
 
     @Override
@@ -92,15 +67,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // If permission is granted, call onMapReady again to set up the location updates
-                // First, check if mMap may is fully initialised
-                if (mMap != null) {
-                    onMapReady(mMap);
-                }
+                geolocationController.startLocationUpdates(this);
             } else {
-                Toast.makeText(this, "Location permission required. Please allow location access.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Location permission denied. Location is needed, please add it!", Toast.LENGTH_LONG).show();
             }
         }
     }
-}
 
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+        // Check for permissions again
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        }
+        mMap.clear(); // Clear previous markers (if any) to re-draw
+        mMap.addMarker(new MarkerOptions().position(new LatLng(55.610611, -4.494881)).title("Kilmarnock Bus Station"));
+    }
+
+    @Override
+    public void onLocationUpdated(double latitude, double longitude) {
+        runOnUiThread(() -> {
+            LatLng currentLocation = new LatLng(latitude, longitude);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
+        });
+    }
+}
