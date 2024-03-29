@@ -8,7 +8,7 @@ public class Objective {
     private String description;
     private boolean completionStatus;
 
-    public Objective(int id, double latitude, double longitude, String name, String description, boolean completionStatus) {
+    public Objective(int id, double latitude, double longitude, String name, String description) {
         this.id = id;
         this.latitude = latitude;
         this.longitude = longitude;
