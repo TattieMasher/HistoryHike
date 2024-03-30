@@ -11,7 +11,9 @@ import androidx.fragment.app.FragmentActivity;
 
 import com.example.historyhike.R;
 import com.example.historyhike.controller.GeolocationController;
+import com.example.historyhike.controller.QuestController;
 import com.example.historyhike.model.Geolocation;
+import com.example.historyhike.model.Museum;
 import com.example.historyhike.model.Objective;
 import com.example.historyhike.model.Quest;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -28,7 +30,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private GeolocationController geolocationController;
     private final int LOCATION_PERMISSION_REQUEST_CODE = 1000; // Must match LocationController
-    private Quest quest1;
+    private QuestController questController;
+    private Museum museum; // TODO: Re-visit. Slightly breaks MVC as this is a model, but its functionality is so simple that an extra controller may overcomplicate
     private boolean isFirstLocated = false;
 
     @Override
@@ -41,19 +44,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         geolocationController = new GeolocationController(this, geolocation);
 
-        // test quest, with objectives
-        Objective obj1 = new Objective(1, 55.606133555727325, -4.497475033611991, "obj1", "desc");
+        // test quest1, with objectives
+        Objective obj1 = new Objective(1, 55.606133555727325, -4.497475033611991, "TexMex", "desc");
         Objective obj2 = new Objective(1, 55.60692571331974, -4.497477031104262, "obj2", "desc");
-        Objective obj3 = new Objective(1, 55.60767046649543, -4.496556187349334, "obj3", "desc");
-        quest1 = new Quest();
-
         ArrayList<Objective> path1 = new ArrayList<>();
         path1.add(obj1);
         path1.add(obj2);
-        path1.add(obj3);
-
+        Quest quest1 = new Quest();
         quest1.setQuestPath(path1);
 
+        // test quest2, with objectives
+        Objective obj3 = new Objective(1, 55.60631364862508, -4.497009665283578, "O'Shan's", "desc");
+        Objective obj4 = new Objective(1, 55.60767046649543, -4.496556187349334, "obj4", "desc");
+        ArrayList<Objective> path2 = new ArrayList<>();
+        path2.add(obj3);
+        path2.add(obj4);
+        Quest quest2 = new Quest();
+        quest2.setQuestPath(path2);
+
+        museum = new Museum(); // Assuming Museum constructor doesn't take parameters
+        ArrayList<Quest> allAvailableQuests = new ArrayList<>(); // TODO: This will come from my API, eventually
+        allAvailableQuests.add(quest1); // Adding both test quests
+        allAvailableQuests.add(quest2); // Adding both test quests
+        questController = new QuestController(allAvailableQuests, museum);
 
         // Find the map asynchronously
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -104,11 +117,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
         }
         mMap.clear(); // Clear previous markers (if any) to re-draw
-        mMap.addMarker(new MarkerOptions().position(new LatLng(55.610611, -4.494881)).title("Kilmarnock Bus Station"));
 
-        for (Objective obj : quest1.getQuestPath()) {
-            mMap.addMarker(new MarkerOptions().position(new LatLng(obj.getLatitude(),obj.getLongitude())).title(obj.getName()));
+        // Get the starting points from the QuestController, of my test quests
+        ArrayList<Objective> startingPoints = questController.getStartingPoints();
+
+        // Loop through each starting point and add it as a marker
+        for (Objective startingPoint : startingPoints) {
+            LatLng position = new LatLng(startingPoint.getLatitude(), startingPoint.getLongitude());
+            mMap.addMarker(new MarkerOptions().position(position).title(startingPoint.getName()));
         }
+
     }
 
     @Override
