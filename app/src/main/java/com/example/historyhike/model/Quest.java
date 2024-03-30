@@ -8,6 +8,7 @@ public class Quest {
     private String description;
     private ArrayList<Objective> questPath;
     private QuestState state; // Enum to hold quest states (NOT_STARTED, IN_PROGRESS & COMPLETED)
+    private Artefact reward;
 
     // Enum for QuestState
     public enum QuestState {
@@ -54,8 +55,22 @@ public class Quest {
         this.state = state;
     }
 
+    public Artefact getReward() {
+        return reward;
+    }
+
+    public void setReward(Artefact reward) {
+        this.reward = reward;
+    }
+
     public Quest() {
         this.questPath = new ArrayList<>();
+        this.state = QuestState.NOT_STARTED;
+    }
+
+    // Overloaded method to pre-fill a quest. Most likely that this will be used, rather than multiple calls to add quest objectives.
+    public Quest(ArrayList<Objective> questPath) {
+        this.questPath = questPath;
         this.state = QuestState.NOT_STARTED;
     }
 
@@ -67,18 +82,5 @@ public class Quest {
             }
         }
         return null; // All objectives completed
-    }
-
-    public void downloadAndStartQuest() {
-        // TODO: Will take a quest from my REST API and begin it. Will store it to allow it to be accessed offline. Maybe even download ALL quests, just not here...?
-    }
-
-    public void completeQuest() {
-        // TODO: Will mark the quest as complete. Possibly delete it?
-    }
-
-
-    public void cancelQuest() {
-        // TODO: Will cancel a quest, allowing the user to start a new one. Possibly delete it?
     }
 }

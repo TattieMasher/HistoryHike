@@ -7,6 +7,7 @@ public class Objective {
     private String name;    // TODO: decide whether or not to keep? Could be good to have a textual representation of an obj, BEFORE reaching it
     private String description;
     private boolean completionStatus;
+    private Artefact reward;
 
     public Objective(int id, double latitude, double longitude, String name, String description) {
         this.id = id;
@@ -61,8 +62,16 @@ public class Objective {
         return completionStatus;
     }
 
-    public void setCompletionStatus(boolean newStatus) {
+    public void setComplete(boolean newStatus) {
         this.completionStatus = newStatus;
+    }
+
+    public Artefact getReward() {
+        return reward;
+    }
+
+    public void setReward(Artefact reward) {
+        this.reward = reward;
     }
 }
 

@@ -29,6 +29,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GeolocationController geolocationController;
     private final int LOCATION_PERMISSION_REQUEST_CODE = 1000; // Must match LocationController
     private Quest quest1;
+    private boolean isFirstLocated = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,8 +114,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onLocationUpdated(double latitude, double longitude) {
         runOnUiThread(() -> {
-            LatLng currentLocation = new LatLng(latitude, longitude);
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 18)); // TODO: Change this, as we don't want the map to re-centre upon every update
+            if(!isFirstLocated) {
+                LatLng currentLocation = new LatLng(latitude, longitude);
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 18));
+                isFirstLocated = true; // Flag variable to stop location updates re-centering EVERY time
+            }
         });
     }
 }
