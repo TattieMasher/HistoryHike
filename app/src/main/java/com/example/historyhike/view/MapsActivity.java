@@ -4,6 +4,8 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -22,12 +24,14 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, Geolocation.LocationUpdateListener {
 
     private GoogleMap mMap;
+    private BottomSheetBehavior bottomSheetBehavior;
     private GeolocationController geolocationController;
     private final int LOCATION_PERMISSION_REQUEST_CODE = 1000; // Must match LocationController
     private QuestController questController;
@@ -73,7 +77,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
+
+        // Initialise BottomSheetBehavior to allow its functionality
+        initialiseBottomSheetBehavior();
     }
+
+    private void initialiseBottomSheetBehavior() {
+        // Find the BottomSheet LinearLayout by its ID
+        final LinearLayout bottomSheet = findViewById(R.id.bottom_sheet);
+
+        // Get the BottomSheetBehavior from the XML
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+
+        // Sets the initial state of the BottomSheet to collapsed
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+        // Sets the peak height
+        bottomSheetBehavior.setPeekHeight(200); // TODO: review this
+        bottomSheetBehavior.setHideable(false); // Keep this. Stops it disappearing
+
+        // Set the BottomSheet to expand fully on click
+        bottomSheet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (bottomSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                } else {
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
+            }
+        });
+
+    }
+
 
     @Override
     protected void onResume() {
