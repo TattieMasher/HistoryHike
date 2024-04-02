@@ -31,14 +31,6 @@
             android:layout_marginBottom="10dp">
         </ImageView>
 
-        <!-- Example Button to show touch is registered -->
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Expand Me"
-            android:focusable="false">
-        </Button>
-
     <!-- Add additional BottomSheet contents here -->
 
     </LinearLayout>
