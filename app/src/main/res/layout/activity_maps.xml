@@ -39,7 +39,7 @@
             <ImageView
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:src="@drawable/museum"
+                android:src="@drawable/museum"></ImageView>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -58,6 +58,47 @@
             android:textSize="50dp"
             android:textColor="@color/white"
             android:layout_gravity="center"></TextView>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/scroll_end"></ImageView>
+        <!-- Quest container !-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#d6ceb3"
+            android:layout_marginTop="-20dp"
+            android:layout_marginBottom="-20dp"
+            android:layout_marginLeft="60dp"
+            android:layout_marginRight="60dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <!-- Quest title !-->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:fontFamily="@font/lora_bold"
+                        android:text="TEST QUEST"
+                        android:textSize="30dp"
+                        android:textColor="@color/black"
+                        android:padding="2dp"></TextView>
+                </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Come and experience the wonders of xyz"
+                    android:textColor="@color/black"
+                    android:padding="5dp"></TextView>
+            </LinearLayout>
+        </LinearLayout>
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
