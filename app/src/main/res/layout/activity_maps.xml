@@ -31,7 +31,37 @@
             android:layout_marginBottom="10dp">
         </ImageView>
 
-    <!-- Add additional BottomSheet contents here -->
+    <!-- Museum container -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
+            <ImageView
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/museum"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/lora"
+                android:text="My Museum"
+                android:textSize="40dp"
+                android:textColor="@color/white"></TextView>
+        </LinearLayout>
+
+        <!-- Quests -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/lora"
+            android:text="Nearby Quests"
+            android:textSize="50dp"
+            android:textColor="@color/white"
+            android:layout_gravity="center"></TextView>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/scroll_end"></ImageView>
 
     </LinearLayout>
 
