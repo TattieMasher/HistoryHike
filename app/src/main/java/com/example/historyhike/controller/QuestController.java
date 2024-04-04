@@ -3,6 +3,8 @@ package com.example.historyhike.controller;
 import com.example.historyhike.model.Objective;
 import com.example.historyhike.model.Quest;
 import com.example.historyhike.model.Museum;
+import com.example.historyhike.view.MapsActivity;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,11 +13,16 @@ public class QuestController {
     private Quest currentQuest;
     private int currentObjectiveIndex;
     private Museum museum;      // Coupled to museum. Maybe not ideal...
+    private MapsActivity mapsActivity;
 
     public QuestController(List<Quest> availableQuests, Museum museum) {
         this.availableQuests = availableQuests;
         this.museum = museum;
         this.currentQuest = null; // No current quest initially
+    }
+
+    public void setMapsActivity(MapsActivity mapsActivity) {
+        this.mapsActivity = mapsActivity;
     }
 
     // Gets the starting points of all quests
@@ -34,6 +41,10 @@ public class QuestController {
             this.currentQuest = quest;
             this.currentObjectiveIndex = 0; // Start with the first objective
             quest.setState(Quest.QuestState.IN_PROGRESS);
+        }
+
+        if (mapsActivity != null) {
+            mapsActivity.updateMapObjective(getCurrentObjective());
         }
     }
 

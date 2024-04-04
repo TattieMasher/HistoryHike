@@ -43,7 +43,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private boolean isFirstLocated = false;
     ArrayList<Quest> allAvailableQuests = new ArrayList<>(); // TODO: This will come from my API, eventually
     private HashMap<Marker, Quest> markerQuestMap = new HashMap<>(); // Used to store quest-objective pairs to display from objective references within the map
-
+    private final int DEFAULT_ZOOM = 18;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,6 +123,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Initialise BottomSheetBehavior to allow its functionality
         initialiseBottomSheetBehavior();
+
+        // Set QuestController's map reference to this activity
+        questController.setMapsActivity(this);
     }
 
     private void initialiseBottomSheetBehavior() {
@@ -153,7 +156,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -164,6 +166,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else {
             // Begin updating locations again
             geolocationController.startLocationUpdates(this);
+            questController.setMapsActivity(this);
         }
     }
 
@@ -240,13 +243,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         markerQuestMap.clear(); // Clear the map for future use
     }
 
+    public void updateMapObjective(Objective objective) {
+        if (objective != null) {
+            LatLng objectiveLocation = new LatLng(objective.getLatitude(), objective.getLongitude());
+            mMap.clear(); // Consider preserving certain markers if needed
+            mMap.addMarker(new MarkerOptions().position(objectiveLocation).title(objective.getDescription()));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(objectiveLocation, DEFAULT_ZOOM));
+        }
+    }
+
     private void recenterMapOnUser() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
             geolocationController.getLastLocation(location -> {
                 if (location != null) {
                     LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 18));
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, DEFAULT_ZOOM));
                 }
             });
         }
