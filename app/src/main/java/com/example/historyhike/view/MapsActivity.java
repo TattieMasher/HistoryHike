@@ -115,7 +115,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             questContainer.addView(questItem);
         }
 
-
         // Find the map asynchronously
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
@@ -224,10 +223,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .setTitle(quest.getTitle())
                 .setMessage(quest.getLongDescription())
                 .setPositiveButton("Accept", (dialogInterface, i) -> {
-                    // Handle quest acceptance here
+                    questController.startQuest(quest);
+                    clearQuestMarkers();
+                    recenterMapOnUser();
                 })
-                .setNegativeButton("Decline", null)
+                .setNegativeButton("Decline", (dialogInterface, i) -> {
+                    // TODO: Just re-center map on quest rejection
+                })
                 .show();
+    }
+
+    private void clearQuestMarkers() {
+        for (Marker marker : markerQuestMap.keySet()) {
+            marker.remove(); // Remove the marker from the map
+        }
+        markerQuestMap.clear(); // Clear the map for future use
+    }
+
+    private void recenterMapOnUser() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+            geolocationController.getLastLocation(location -> {
+                if (location != null) {
+                    LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 18));
+                }
+            });
+        }
     }
 
     @Override

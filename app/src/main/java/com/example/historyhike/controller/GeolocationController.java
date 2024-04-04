@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Looper;
 
 import androidx.core.app.ActivityCompat;
@@ -16,6 +17,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 public class GeolocationController {
     private final FusedLocationProviderClient fusedLocationProviderClient;
@@ -28,6 +30,26 @@ public class GeolocationController {
         this.context = context;
         this.geolocation = geolocation;
         this.fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
+    }
+
+    private void initialiseLocationCallback() {
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return; // Handle the case where locationResult is null if needed
+                }
+                geolocation.updateLocation(locationResult.getLastLocation());
+            }
+        };
+    }
+
+    public void getLastLocation(OnSuccessListener<Location> listener) {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Permissions check
+            return;
+        }
+        fusedLocationProviderClient.getLastLocation().addOnSuccessListener(listener);
     }
 
     @SuppressLint("MissingPermission")
@@ -50,7 +72,7 @@ public class GeolocationController {
                     // TODO: handle location failures
                     return;
                 }
-                // Assuming the Geolocation class has a method to handle new location updates
+                // Place new location
                 geolocation.updateLocation(locationResult.getLastLocation());
             }
         };
@@ -59,7 +81,7 @@ public class GeolocationController {
     }
 
     public void stopLocationUpdates() {
-        fusedLocationProviderClient.removeLocationUpdates(this.locationCallback);
+        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
     }
 
     public int getLocationPermissionRequestCode() {
