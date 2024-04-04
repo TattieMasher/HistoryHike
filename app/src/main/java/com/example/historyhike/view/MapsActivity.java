@@ -1,8 +1,8 @@
 package com.example.historyhike.view;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,10 +25,12 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, Geolocation.LocationUpdateListener {
 
@@ -39,6 +41,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private QuestController questController;
     private Museum museum; // TODO: Re-visit. Slightly breaks MVC as this is a model, but its functionality is so simple that an extra controller may overcomplicate
     private boolean isFirstLocated = false;
+    ArrayList<Quest> allAvailableQuests = new ArrayList<>(); // TODO: This will come from my API, eventually
+    private HashMap<Marker, Quest> markerQuestMap = new HashMap<>(); // Used to store quest-objective pairs to display from objective references within the map
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +64,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Quest quest1 = new Quest();
         quest1.setTitle("Quest 1!");
         quest1.setDescription("C'mon, complete me!");
+        quest1.setLongDescription("Are you brave enough to visit the Kilmarnock TexMex? \n\nLegend has it that the food can explode even the most iron-clad of stomachs! \n\nIf you can handle the heat, you can surely handle anything!");
         quest1.setQuestPath(path1);
 
         // test quest2, with objectives
@@ -73,17 +79,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         quest2.setQuestPath(path2);
 
         museum = new Museum(); // Assuming Museum constructor doesn't take parameters
-        ArrayList<Quest> allAvailableQuests = new ArrayList<>(); // TODO: This will come from my API, eventually
         allAvailableQuests.add(quest1); // Adding both test quests
         allAvailableQuests.add(quest2); // Adding both test quests
         questController = new QuestController(allAvailableQuests, museum);
 
-        // Assuming 'questContainer' is the LinearLayout in your current XML where quests will be added
+        // Get reference to quest container from Activity_maps xml
         LinearLayout questContainer = findViewById(R.id.quest_container);
 
-        // Iterate over test quests
+        // Iterate over test quests (TODO: from live db, obviously)
         for (Quest quest : allAvailableQuests) {
-            // Inflate the quest item layout
+            // Inflate the quest item layout into quest container
             View questItem = LayoutInflater.from(this).inflate(R.layout.quest_item, questContainer, false);
 
             // Set the title and description
@@ -91,6 +96,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             TextView description = questItem.findViewById(R.id.quest_description);
             title.setText(quest.getTitle());
             description.setText(quest.getDescription());
+
+            questItem.setOnClickListener(view -> {
+                // Retrieve the first objective of the clicked quest
+                Objective firstObjective = quest.getQuestPath().get(0);
+                double lat = firstObjective.getLatitude();
+                double lng = firstObjective.getLongitude();
+
+                // Collapse the bottom sheet when quest is clicked
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+                // Set map to location of first obj on clicked quest
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 20)); // Adjust zoom level as needed
+            });
+
 
             // Add the inflated view to the quest container
             questContainer.addView(questItem);
@@ -180,14 +199,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.clear(); // Clear previous markers (if any) to re-draw
 
         // Get the starting points from the QuestController, of my test quests
-        ArrayList<Objective> startingPoints = questController.getStartingPoints();
-
-        // Loop through each starting point and add it as a marker
-        for (Objective startingPoint : startingPoints) {
+        for (Quest quest : allAvailableQuests) {
+            // Assuming each quest has a method to get its starting point
+            Objective startingPoint = quest.getQuestPath().get(0);
             LatLng position = new LatLng(startingPoint.getLatitude(), startingPoint.getLongitude());
-            mMap.addMarker(new MarkerOptions().position(position).title(startingPoint.getName()));
+            Marker marker = mMap.addMarker(new MarkerOptions().position(position).title(quest.getTitle()));
+
+            // Associate the marker with its quest
+            markerQuestMap.put(marker, quest);
         }
 
+        // Set up the marker click listener
+        mMap.setOnMarkerClickListener(marker -> {
+            Quest quest = markerQuestMap.get(marker);
+            if (quest != null) {
+                showQuestDialog(quest);
+            }
+            return true;
+        });
+    }
+
+    private void showQuestDialog(Quest quest) {
+        new AlertDialog.Builder(this)
+                .setTitle(quest.getTitle())
+                .setMessage(quest.getLongDescription())
+                .setPositiveButton("Accept", (dialogInterface, i) -> {
+                    // Handle quest acceptance here
+                })
+                .setNegativeButton("Decline", null)
+                .show();
     }
 
     @Override

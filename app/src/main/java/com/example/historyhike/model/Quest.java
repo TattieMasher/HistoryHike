@@ -6,9 +6,11 @@ public class Quest {
     private int id;
     private String title;
     private String description;
+    private String longDescription; // Displayed before accepting a quest
     private ArrayList<Objective> questPath;
     private QuestState state; // Enum to hold quest states (NOT_STARTED, IN_PROGRESS & COMPLETED)
     private Artefact reward;
+    private String finishDescription; // Displayed after quest completion
 
     // Enum for QuestState
     public enum QuestState {
@@ -39,6 +41,14 @@ public class Quest {
         this.description = description;
     }
 
+    public String getLongDescription() {
+        return longDescription;
+    }
+
+    public void setLongDescription(String longDescription) {
+        this.longDescription = longDescription;
+    }
+
     public ArrayList<Objective> getQuestPath() {
         return questPath;
     }
@@ -61,6 +71,14 @@ public class Quest {
 
     public void setReward(Artefact reward) {
         this.reward = reward;
+    }
+
+    public String getFinishDescription() {
+        return finishDescription;
+    }
+
+    public void setFinishDescription(String finishDescription) {
+        this.finishDescription = finishDescription;
     }
 
     public Quest() {

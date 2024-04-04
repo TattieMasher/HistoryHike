@@ -59,23 +59,30 @@
             android:textColor="@color/white"
             android:layout_gravity="center"></TextView>
         <ImageView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:src="@drawable/scroll_end"></ImageView>
         <!-- Quest container !-->
-        <LinearLayout
-            android:id="@+id/quest_container"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/scroll_background"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:layout_marginTop="-20dp"
             android:layout_marginBottom="-20dp"
             android:layout_marginLeft="60dp"
             android:layout_marginRight="60dp"
-            android:orientation="vertical">
-        </LinearLayout>
+            android:fillViewport="true"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            <LinearLayout
+                android:id="@+id/quest_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/scroll_background"
+                android:orientation="vertical">
+            </LinearLayout>
+        </ScrollView>
         <ImageView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:src="@drawable/scroll_end"></ImageView>
 
