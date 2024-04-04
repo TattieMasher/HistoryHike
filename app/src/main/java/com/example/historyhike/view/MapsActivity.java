@@ -4,8 +4,10 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -55,6 +57,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         path1.add(obj1);
         path1.add(obj2);
         Quest quest1 = new Quest();
+        quest1.setTitle("Quest 1!");
+        quest1.setDescription("C'mon, complete me!");
         quest1.setQuestPath(path1);
 
         // test quest2, with objectives
@@ -64,6 +68,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         path2.add(obj3);
         path2.add(obj4);
         Quest quest2 = new Quest();
+        quest2.setTitle("Quest 2...");
+        quest2.setDescription("Complete me too, please!");
         quest2.setQuestPath(path2);
 
         museum = new Museum(); // Assuming Museum constructor doesn't take parameters
@@ -71,6 +77,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         allAvailableQuests.add(quest1); // Adding both test quests
         allAvailableQuests.add(quest2); // Adding both test quests
         questController = new QuestController(allAvailableQuests, museum);
+
+        // Assuming 'questContainer' is the LinearLayout in your current XML where quests will be added
+        LinearLayout questContainer = findViewById(R.id.quest_container);
+
+        // Iterate over test quests
+        for (Quest quest : allAvailableQuests) {
+            // Inflate the quest item layout
+            View questItem = LayoutInflater.from(this).inflate(R.layout.quest_item, questContainer, false);
+
+            // Set the title and description
+            TextView title = questItem.findViewById(R.id.quest_title);
+            TextView description = questItem.findViewById(R.id.quest_description);
+            title.setText(quest.getTitle());
+            description.setText(quest.getDescription());
+
+            // Add the inflated view to the quest container
+            questContainer.addView(questItem);
+        }
+
 
         // Find the map asynchronously
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
