@@ -7,11 +7,13 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Looper;
+import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.historyhike.model.Geolocation;
+import com.example.historyhike.model.ProximityListener;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -25,20 +27,29 @@ public class GeolocationController {
     private final Context context;
     private final int LOCATION_PERMISSION_REQUEST_CODE = 1000; // Request code
     private LocationCallback locationCallback;
+    private ProximityListener proximityListener;
+
 
     public GeolocationController(Context context, Geolocation geolocation) {
         this.context = context;
         this.geolocation = geolocation;
         this.fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
+        initialiseLocationCallback();
+    }
+
+    public void setProximityListener(ProximityListener listener) {
+        this.proximityListener = listener;
     }
 
     private void initialiseLocationCallback() {
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
+                Log.d("LocationUpdate", "Location update received: " + locationResult.getLastLocation());
                 if (locationResult == null) {
-                    return; // Handle the case where locationResult is null if needed
+                    return; // TODO: Handle locationResult being null?
                 }
+                proximityListener.onProximityCheck(locationResult.getLastLocation());
                 geolocation.updateLocation(locationResult.getLastLocation());
             }
         };
@@ -64,18 +75,6 @@ public class GeolocationController {
         locationRequest.setInterval(10000); // 10 seconds
         locationRequest.setFastestInterval(3000); // 3 seconds
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-        LocationCallback locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                if (locationResult == null) {
-                    // TODO: handle location failures
-                    return;
-                }
-                // Place new location
-                geolocation.updateLocation(locationResult.getLastLocation());
-            }
-        };
 
         fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
     }

@@ -1,6 +1,11 @@
 package com.example.historyhike.controller;
 
+import android.location.Location;
+import android.util.Log;
+import android.widget.Toast;
+
 import com.example.historyhike.model.Objective;
+import com.example.historyhike.model.ProximityListener;
 import com.example.historyhike.model.Quest;
 import com.example.historyhike.model.Museum;
 import com.example.historyhike.view.MapsActivity;
@@ -8,12 +13,13 @@ import com.example.historyhike.view.MapsActivity;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QuestController {
+public class QuestController implements ProximityListener {
     private List<Quest> availableQuests;
     private Quest currentQuest;
     private int currentObjectiveIndex;
     private Museum museum;      // Coupled to museum. Maybe not ideal...
     private MapsActivity mapsActivity;
+    final float PROXIMITY_THRESHOLD = 30; // TODO: Revise the proximity
 
     public QuestController(List<Quest> availableQuests, Museum museum) {
         this.availableQuests = availableQuests;
@@ -23,6 +29,11 @@ public class QuestController {
 
     public void setMapsActivity(MapsActivity mapsActivity) {
         this.mapsActivity = mapsActivity;
+    }
+
+    @Override
+    public void onProximityCheck(Location location) {
+        checkAndUpdateObjectiveBasedOnProximity(location);
     }
 
     // Gets the starting points of all quests
@@ -62,10 +73,34 @@ public class QuestController {
     public void cancelQuest() {
         if (currentQuest != null && currentQuest.getState() == Quest.QuestState.IN_PROGRESS) {
             currentQuest.setState(Quest.QuestState.NOT_STARTED);
-            // Additional logic to reset or remove the current quest
+            // TODO: extra logic
             currentQuest = null;
         }
     }
+
+    public void checkAndUpdateObjectiveBasedOnProximity(Location currentLocation) {
+        if (currentQuest == null || currentObjectiveIndex < 0 || currentObjectiveIndex >= currentQuest.getQuestPath().size()) {
+            return; // No active quest or invalid objective index
+        }
+
+        Objective currentObjective = getCurrentObjective();
+        if (currentObjective == null) {
+            return; // TODO: Handle this error case
+        }
+
+        float[] results = new float[1];
+        Location.distanceBetween(currentLocation.getLatitude(), currentLocation.getLongitude(),
+                currentObjective.getLatitude(), currentObjective.getLongitude(), results);
+        float distanceInMeters = results[0];
+
+        if (distanceInMeters <= PROXIMITY_THRESHOLD) {
+            completeObjective(); // TODO: notify the view
+        }
+
+        Log.d("ProximityCheck", "Distance to objective: " + distanceInMeters + " meters.");
+        Log.d("ProximityCheck", currentQuest.getTitle() + ": " + currentObjective.getName());
+    }
+
 
     public Objective getCurrentObjective() {
         if (currentQuest != null && currentObjectiveIndex >= 0) { // set by startQuest
@@ -80,8 +115,11 @@ public class QuestController {
             currentObjective.setComplete(true);
 
             if (currentObjectiveIndex < currentQuest.getQuestPath().size() - 1) {
-                // Move to the next objective
                 currentObjectiveIndex++;
+                // Fetch the next objective after incrementing the index
+                Objective nextObjective = getCurrentObjective();
+                // Ensure to update the map with the *next* objective
+                mapsActivity.runOnUiThread(() -> mapsActivity.updateMapObjective(nextObjective));
             } else {
                 // All objectives completed
                 completeQuest();

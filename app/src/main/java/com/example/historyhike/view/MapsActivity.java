@@ -78,9 +78,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         quest2.setDescription("Complete me too, please!");
         quest2.setQuestPath(path2);
 
+        // test quest3, with objectives
+        Objective obj5 = new Objective(1, 55.6057023352494, -4.496883453828011, "Home", "desc");
+        Objective obj6 = new Objective(1, 55.604129221001536, -4.496313879389737, "Mc'D's", "desc");
+        ArrayList<Objective> path3 = new ArrayList<>();
+        path3.add(obj5);
+        path3.add(obj6);
+        Quest quest3 = new Quest();
+        quest3.setTitle("Test me");
+        quest3.setDescription("From home to McDonald's. A Quest well completed.");
+        quest3.setQuestPath(path3);
+
+        // test quest3, with objectives
+        Objective obj7 = new Objective(1, 55.8488277141385, -4.208753908311329, "Work", "desc");
+        Objective obj8 = new Objective(1, 55.8488031148417, -4.207922347663928, "Super store", "desc");
+        Objective obj9 = new Objective(1, 55.84906279473297, -4.2065814572692695, "Stadium", "desc");
+        ArrayList<Objective> path4 = new ArrayList<>();
+        path4.add(obj7);
+        path4.add(obj8);
+        path4.add(obj9);
+        Quest quest4 = new Quest();
+        quest4.setTitle("Celtic");
+        quest4.setDescription("'Mon the hoops");
+        quest4.setLongDescription("Get back to work");
+        quest4.setQuestPath(path4);
+
         museum = new Museum(); // Assuming Museum constructor doesn't take parameters
         allAvailableQuests.add(quest1); // Adding both test quests
         allAvailableQuests.add(quest2); // Adding both test quests
+        allAvailableQuests.add(quest3);
+        allAvailableQuests.add(quest4);
         questController = new QuestController(allAvailableQuests, museum);
 
         // Get reference to quest container from Activity_maps xml
@@ -126,6 +153,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Set QuestController's map reference to this activity
         questController.setMapsActivity(this);
+
+        geolocationController.setProximityListener(questController);
     }
 
     private void initialiseBottomSheetBehavior() {
@@ -231,7 +260,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     recenterMapOnUser();
                 })
                 .setNegativeButton("Decline", (dialogInterface, i) -> {
-                    // TODO: Just re-center map on quest rejection
+                    recenterMapOnUser();
                 })
                 .show();
     }
