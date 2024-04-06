@@ -36,6 +36,8 @@ public class QuestController implements ProximityListener {
         checkAndUpdateObjectiveBasedOnProximity(location);
     }
 
+
+
     // Gets the starting points of all quests
     public ArrayList<Objective> getStartingPoints() {
         ArrayList<Objective> startingPoints = new ArrayList<>();

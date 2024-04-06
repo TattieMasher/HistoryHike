@@ -41,6 +41,10 @@ public class GeolocationController {
         this.proximityListener = listener;
     }
 
+    public void setLocationUpdateListener(Geolocation.LocationUpdateListener listener) {
+        geolocation.setLocationUpdateListener(listener);
+    }
+
     private void initialiseLocationCallback() {
         locationCallback = new LocationCallback() {
             @Override

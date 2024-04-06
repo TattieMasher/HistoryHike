@@ -51,32 +51,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
 
         Geolocation geolocation = new Geolocation();
-        geolocation.setLocationUpdateListener(this); // Set MapsActivity as the location listener
 
         geolocationController = new GeolocationController(this, geolocation);
-
-        // test quest1, with objectives
-        Objective obj1 = new Objective(1, 55.606133555727325, -4.497475033611991, "TexMex", "desc");
-        Objective obj2 = new Objective(1, 55.60692571331974, -4.497477031104262, "obj2", "desc");
-        ArrayList<Objective> path1 = new ArrayList<>();
-        path1.add(obj1);
-        path1.add(obj2);
-        Quest quest1 = new Quest();
-        quest1.setTitle("Quest 1!");
-        quest1.setDescription("C'mon, complete me!");
-        quest1.setLongDescription("Are you brave enough to visit the Kilmarnock TexMex? \n\nLegend has it that the food can explode even the most iron-clad of stomachs! \n\nIf you can handle the heat, you can surely handle anything!");
-        quest1.setQuestPath(path1);
-
-        // test quest2, with objectives
-        Objective obj3 = new Objective(1, 55.60631364862508, -4.497009665283578, "O'Shan's", "desc");
-        Objective obj4 = new Objective(1, 55.60767046649543, -4.496556187349334, "obj4", "desc");
-        ArrayList<Objective> path2 = new ArrayList<>();
-        path2.add(obj3);
-        path2.add(obj4);
-        Quest quest2 = new Quest();
-        quest2.setTitle("Quest 2...");
-        quest2.setDescription("Complete me too, please!");
-        quest2.setQuestPath(path2);
+        geolocationController.setLocationUpdateListener(this); // Set MapsActivity as the location listener
 
         // test quest3, with objectives
         Objective obj5 = new Objective(1, 55.6057023352494, -4.496883453828011, "Home", "desc");
@@ -89,38 +66,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         quest3.setDescription("From home to McDonald's. A Quest well completed.");
         quest3.setQuestPath(path3);
 
-        // test quest3, with objectives
-        Objective obj7 = new Objective(1, 55.8488277141385, -4.208753908311329, "Work", "desc");
-        Objective obj8 = new Objective(1, 55.8488031148417, -4.207922347663928, "Super store", "desc");
-        Objective obj9 = new Objective(1, 55.84906279473297, -4.2065814572692695, "Stadium", "desc");
-        ArrayList<Objective> path4 = new ArrayList<>();
-        path4.add(obj7);
-        path4.add(obj8);
-        path4.add(obj9);
-        Quest quest4 = new Quest();
-        quest4.setTitle("Celtic");
-        quest4.setDescription("'Mon the hoops");
-        quest4.setLongDescription("Get back to work");
-        quest4.setQuestPath(path4);
-
-        museum = new Museum(); // Assuming Museum constructor doesn't take parameters
-        allAvailableQuests.add(quest1); // Adding both test quests
-        allAvailableQuests.add(quest2); // Adding both test quests
+        museum = new Museum();
         allAvailableQuests.add(quest3);
-        allAvailableQuests.add(quest4);
         questController = new QuestController(allAvailableQuests, museum);
 
         // Get reference to quest container from Activity_maps xml
-        LinearLayout questContainer = findViewById(R.id.quest_container);
+        LinearLayout scrollContainer = findViewById(R.id.quest_container);
 
         // Iterate over test quests (TODO: from live db, obviously)
         for (Quest quest : allAvailableQuests) {
             // Inflate the quest item layout into quest container
-            View questItem = LayoutInflater.from(this).inflate(R.layout.quest_item, questContainer, false);
+            View questItem = LayoutInflater.from(this).inflate(R.layout.scroll_item, scrollContainer, false);
 
             // Set the title and description
-            TextView title = questItem.findViewById(R.id.quest_title);
-            TextView description = questItem.findViewById(R.id.quest_description);
+            TextView title = questItem.findViewById(R.id.scroll_title);
+            TextView description = questItem.findViewById(R.id.scroll_description);
             title.setText(quest.getTitle());
             description.setText(quest.getDescription());
 
@@ -137,9 +97,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 20)); // Adjust zoom level as needed
             });
 
-
             // Add the inflated view to the quest container
-            questContainer.addView(questItem);
+            scrollContainer.addView(questItem);
         }
 
         // Find the map asynchronously
@@ -182,7 +141,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         });
-
     }
 
     @Override
