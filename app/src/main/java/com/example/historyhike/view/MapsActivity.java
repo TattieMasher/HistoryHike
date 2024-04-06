@@ -224,11 +224,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    private void completeObjective() {
-
+    public void completeObjective() {
+        // Assuming you have a title and description for the completed objective
+        String title = "Complete!";
+        String description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc sagittis odio gravida, scelerisque nulla a, tristique lacus. Suspendisse fringilla arcu ac lobortis molestie. Sed quis nibh venenatis, dictum ante eu, egestas massa. Vestibulum venenatis lacinia mollis. Praesent tempus eleifend auctor. \\n\\n\n" +
+                "Pellentesque eget magna arcu. Integer eget libero lectus. Morbi vitae metus in odio tempor efficitur vitae eget odio. Donec sit amet nibh dui. Phasellus dui turpis, hendrerit eget aliquam non, ultricies vitae dolor. Integer semper faucibus nisi, sit amet pellentesque orci iaculis at.";
+        // TODO: New lines don't work
+        ObjectiveCompleteDialogFragment dialogFragment = ObjectiveCompleteDialogFragment.newInstance(title, description);
+        dialogFragment.show(getSupportFragmentManager(), "objectiveCompleteDialog");
+        updateObjectivesView();
     }
 
-    public void updateObjectivesView() {
+    private void updateObjectivesView() {
         LinearLayout scrollContainer = findViewById(R.id.scroll_container);
         scrollContainer.removeAllViews(); // Clear existing views TODO: necessary? Only need this when moving from quests -> objectives
 

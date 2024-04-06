@@ -129,7 +129,7 @@ public class QuestController implements ProximityListener {
                 // Update the map with the *next* objective
                 mapsActivity.runOnUiThread(() -> mapsActivity.updateMapObjective(nextObjective));
                 // Update objectives list from view
-                mapsActivity.updateObjectivesView();
+                mapsActivity.completeObjective();
             } else {
                 // All objectives completed
                 completeQuest();
