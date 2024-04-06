@@ -212,11 +212,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 geolocationController.startLocationUpdates(this);
+                // Ensure the map is ready and permissions are granted before enabling the location layer
+                if (mMap != null) {
+                    try {
+                        mMap.setMyLocationEnabled(true);
+                        recenterMapOnUser();
+                    } catch (SecurityException e) {
+                        e.printStackTrace();
+                    }
+                }
             } else {
                 Toast.makeText(this, "Location permission denied. Location is needed, please add it!", Toast.LENGTH_LONG).show();
             }
         }
     }
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
