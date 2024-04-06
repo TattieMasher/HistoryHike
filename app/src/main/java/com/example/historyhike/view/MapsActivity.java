@@ -87,6 +87,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Objective obj5 = new Objective(1, 55.6057023352494, -4.496883453828011, "Home", "desc");
         Objective obj6 = new Objective(1, 55.604129221001536, -4.496313879389737, "Mc'D's", "desc");
         ArrayList<Objective> path3 = new ArrayList<>();
+        obj5.setImageURL("https://historyhike.alex-mccaughran.net/objective1.png");
+        obj6.setImageURL("https://historyhike.alex-mccaughran.net/objective2.png");
         path3.add(obj5);
         path3.add(obj6);
         Quest quest3 = new Quest();
@@ -228,10 +230,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Assuming you have a title and description for the completed objective
         String title = questController.getCurrentObjective().getName();
         String description = questController.getCurrentObjective().getDescription();
+        String imageURL = questController.getCurrentObjective().getImageURL();
         // TODO: New lines don't work
-        int image = R.drawable.objective2;
 
-        ObjectiveCompleteDialogFragment dialogFragment = ObjectiveCompleteDialogFragment.newInstance(title, description, image);
+        ObjectiveCompleteDialogFragment dialogFragment = ObjectiveCompleteDialogFragment.newInstance(title, description, imageURL);
         dialogFragment.show(getSupportFragmentManager(), "objectiveCompleteDialog");
         updateObjectivesView();
     }
