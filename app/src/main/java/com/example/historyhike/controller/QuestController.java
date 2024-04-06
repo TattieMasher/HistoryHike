@@ -4,6 +4,9 @@ import android.location.Location;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.historyhike.model.Objective;
 import com.example.historyhike.model.ProximityListener;
 import com.example.historyhike.model.Quest;
@@ -60,12 +63,24 @@ public class QuestController implements ProximityListener {
             this.currentQuest = quest;
             this.currentObjectiveIndex = 0; // Start with the first objective
             quest.setState(Quest.QuestState.IN_PROGRESS);
-        }
 
-        if (mapsActivity != null) {
-            mapsActivity.updateMapObjective(getCurrentObjective());
+            // Preload images for each objective
+            for (Objective objective : quest.getQuestPath()) {
+                String imageUrl = objective.getImageURL(); // TODO: Make sure this is always set. I know you're gonna forget later, so todo todo todo
+                if (imageUrl != null && !imageUrl.isEmpty()) {
+                    Glide.with(mapsActivity)
+                            .load(imageUrl)
+                            .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL))
+                            .preload();
+                }
+            }
+
+            if (mapsActivity != null) {
+                mapsActivity.updateMapObjective(getCurrentObjective());
+            }
         }
     }
+
 
     public void completeQuest() {
         if (currentQuest != null) {
