@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">HistoryHike</string>
     <string name="title_activity_maps">MapsActivity</string>
+    <string name="scroll_quest_title">Nearby Quests</string>
+    <string name="scroll_obj_title">Objectives</string>
 </resources>

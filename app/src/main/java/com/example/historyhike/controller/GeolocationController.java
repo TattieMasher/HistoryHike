@@ -29,7 +29,6 @@ public class GeolocationController {
     private LocationCallback locationCallback;
     private ProximityListener proximityListener;
 
-
     public GeolocationController(Context context, Geolocation geolocation) {
         this.context = context;
         this.geolocation = geolocation;

@@ -64,11 +64,12 @@
 
         <!-- Quests -->
         <TextView
+            android:id="@+id/scroll_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/lora"
-            android:text="Nearby Quests"
-            android:textSize="50dp"
+            android:text="@string/scroll_quest_title"
+            android:textSize="45dp"
             android:textColor="@color/white"
             android:layout_gravity="center"></TextView>
         <ImageView

@@ -38,7 +38,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleMap mMap;
     private BottomSheetBehavior bottomSheetBehavior;
     private GeolocationController geolocationController;
-    private final int LOCATION_PERMISSION_REQUEST_CODE = 1000; // Must match LocationController
+    private final int LOCATION_PERMISSION_REQUEST_CODE = 1000; // Must match GeolocationController
     private QuestController questController;
     private Museum museum; // TODO: Re-visit. Slightly breaks MVC as this is a model, but its functionality is so simple that an extra controller may overcomplicate
     private boolean isFirstLocated = false;
@@ -49,22 +49,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
+        setUpContentView();         // Set up activity and map within
+        initialiseComponents();     // Initialise some dynamic components
+        testQuests();               // Create test quests and populate them, to test as we go
+        initialiseControllers();    // Initialise the geolocation and quest controllers
 
-        Geolocation geolocation = new Geolocation();
+        // Request permissions, if necessary
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Request if denied
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        }
+    }
 
-        geolocationController = new GeolocationController(this, geolocation);
-        geolocationController.setLocationUpdateListener(this); // Set MapsActivity as the location listener
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Check for permissions
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Request if denied
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        } else {
+            // Begin updating locations again
+            geolocationController.startLocationUpdates(this);
+            questController.setMapsActivity(this);
+        }
+    }
 
-        Button btnCancelQuest = findViewById(R.id.btnCancelQuest);
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Pause location updates when app is closed
+        geolocationController.stopLocationUpdates();
+    }
 
-        btnCancelQuest.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                cancelQuest();
-            }
-        });
-
+    private void testQuests(){
         // test quest3, with objectives
         Objective obj5 = new Objective(1, 55.6057023352494, -4.496883453828011, "Home", "desc");
         Objective obj6 = new Objective(1, 55.604129221001536, -4.496313879389737, "Mc'D's", "desc");
@@ -79,21 +97,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         museum = new Museum();
         allAvailableQuests.add(quest3); // This will be obtained from QuestController once structure is complete
         questController = new QuestController(allAvailableQuests, museum);
+    }
 
-        if(questController.getCurrentQuest() == null) {
-            addQuestsToSheet(); // currently uses allAvailableQuests field
-        } else {
-            addObjectivesToSheet();
-        }
-
-        // Find the map asynchronously
+    private void setUpContentView() {
+        setContentView(R.layout.activity_maps);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
+    }
 
-        // Initialise BottomSheetBehavior to allow its functionality
-        initialiseBottomSheetBehavior();
+    private void initialiseComponents() {
+        Button btnCancelQuest = findViewById(R.id.btnCancelQuest);
+        TextView scrollTitle = findViewById(R.id.scroll_title);
+
+        btnCancelQuest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cancelQuest();
+            }
+        });
+
+        scrollTitle.setText(getString(R.string.scroll_quest_title)); // Already set in XML anyway, but just to be sure
+        initialiseBottomSheetBehavior();    // Allow expected BottomSheet behaviour
+    }
+
+    private void initialiseControllers() {
+        Geolocation geolocation = new Geolocation();
+
+        geolocationController = new GeolocationController(this, geolocation);
+        geolocationController.setLocationUpdateListener(this); // Set MapsActivity as the location listener
+
+        if(questController.getCurrentQuest() == null) {
+            addQuestsToSheet(); // currently uses allAvailableQuests field
+        } else {
+            updateObjectivesView();
+        }
 
         // Set QuestController's map reference to this activity
         questController.setMapsActivity(this);
@@ -128,9 +167,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
+    // To be called also when quests are cancelled or completed
+    private void initialiseMapWithQuests() {
+        if (mMap == null) return; // in case mMap is not initialized yet, as this is going to be called in multiple places
+
+        mMap.clear(); // Clear any previous markers to re-draw
+
+        // Loop through available quests to add their first objective as a marker
+        for (Quest quest : allAvailableQuests) {
+            Objective startingPoint = quest.getQuestPath().get(0); // Get the fist objective
+            LatLng position = new LatLng(startingPoint.getLatitude(), startingPoint.getLongitude()); // Get its location
+            Marker marker = mMap.addMarker(new MarkerOptions().position(position).title(quest.getTitle())); // Create a marker for it
+            markerQuestMap.put(marker, quest); // Associate marker with quest for later reference
+        }
+
+        // Setting marker click listener
+        mMap.setOnMarkerClickListener(marker -> {
+            Quest quest = markerQuestMap.get(marker);
+            if (quest != null) {
+                showQuestDialog(quest); // Show a dialog when a quest marker is clicked
+            }
+            return true; // Return true to indicate we've handled the event
+        });
+    }
+
     private void addQuestsToSheet() {
         // Get reference to quest container from Activity_maps xml
         LinearLayout scrollContainer = findViewById(R.id.scroll_container);
+        scrollContainer.removeAllViews(); // Clear the container of any remaining views
 
         for (Quest quest : allAvailableQuests) {
             // Inflate the quest item layout into quest container
@@ -160,56 +224,43 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    private void addObjectivesToSheet() {
-        // Get reference to quest container from Activity_maps xml
+    private void completeObjective() {
+
+    }
+
+    public void updateObjectivesView() {
         LinearLayout scrollContainer = findViewById(R.id.scroll_container);
+        scrollContainer.removeAllViews(); // Clear existing views TODO: necessary? Only need this when moving from quests -> objectives
 
-        for(Objective obj : questController.getCurrentQuest().getQuestPath()) {
-            // Inflate the quest item layout into quest container
-            View objItem = LayoutInflater.from(this).inflate(R.layout.scroll_item, scrollContainer, false);
+        Quest currentQuest = questController.getCurrentQuest();
+        boolean foundNextObjective = false;
 
-            // Set the title and description
-            TextView title = objItem.findViewById(R.id.scroll_title);
-            TextView description = objItem.findViewById(R.id.scroll_description);
-            title.setText(obj.getName());
-            description.setText(obj.getDescription());
+        if (currentQuest != null) {
+            for (Objective objective : currentQuest.getQuestPath()) {
+                View objectiveView = LayoutInflater.from(this).inflate(R.layout.scroll_item, scrollContainer, false);
+                TextView title = objectiveView.findViewById(R.id.scroll_title);
+                TextView description = objectiveView.findViewById(R.id.scroll_description);
 
-            objItem.setOnClickListener(view -> {
-                // Get the location of the clicked objective
-                double lat = obj.getLatitude();
-                double lng = obj.getLongitude();
+                title.setText(objective.getName());
+                description.setText(objective.getDescription());
 
-                // Collapse the bottom sheet when obj is clicked
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                // If this objective is complete or we have already found the next objective,
+                if (objective.isComplete() || foundNextObjective) {
+                    title.setTextColor(getResources().getColor(R.color.greyText)); // grey out the text
+                    description.setTextColor(getResources().getColor(R.color.greyText));
+                } else {
+                    // This is the next incomplete objective.
+                    foundNextObjective = true; // Mark that the next objective is found
+                }
 
-                // Set map to location obj when clicked
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 20)); // Adjust zoom level as needed
-            });
+                scrollContainer.addView(objectiveView, 0); // Add next objective at the top of the list
 
-            // Add the inflated view to the quest container
-            scrollContainer.addView(objItem);
+                // Once the next incomplete objective has been added, break to stop adding more.
+                if (foundNextObjective) {
+                    break;
+                }
+            }
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Check for permissions
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // Request if denied
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
-        } else {
-            // Begin updating locations again
-            geolocationController.startLocationUpdates(this);
-            questController.setMapsActivity(this);
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        // Pause location updates when app is closed
-        geolocationController.stopLocationUpdates();
     }
 
     @Override
@@ -228,7 +279,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                 }
             } else {
-                Toast.makeText(this, "Location permission denied. Location is needed, please add it!", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Location permission is required", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -242,27 +293,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
         }
-        mMap.clear(); // Clear previous markers (if any) to re-draw
-
-        // Get the starting points from the QuestController, of my test quests
-        for (Quest quest : allAvailableQuests) {
-            // Assuming each quest has a method to get its starting point
-            Objective startingPoint = quest.getQuestPath().get(0);
-            LatLng position = new LatLng(startingPoint.getLatitude(), startingPoint.getLongitude());
-            Marker marker = mMap.addMarker(new MarkerOptions().position(position).title(quest.getTitle()));
-
-            // Associate the marker with its quest
-            markerQuestMap.put(marker, quest);
-        }
-
-        // Set up the marker click listener
-        mMap.setOnMarkerClickListener(marker -> {
-            Quest quest = markerQuestMap.get(marker);
-            if (quest != null) {
-                showQuestDialog(quest);
-            }
-            return true;
-        });
+        initialiseMapWithQuests();
     }
 
     private void showQuestDialog(Quest quest) {
@@ -279,17 +310,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void acceptQuest(Quest quest) {
+        TextView scrollTitle = findViewById(R.id.scroll_title);
+
         questController.startQuest(quest);
-        clearQuestMarkers();
         recenterMapOnUser();
         updateObjectivesView();
         cancelButtonVisible(true); // Show cancel quest button
+
+        scrollTitle.setText(R.string.scroll_obj_title);
     }
 
     public void cancelQuest() {
         questController.cancelQuest();
         // Hide the cancel button
-        cancelButtonVisible(true);  // Hide cancel quest button
+        cancelButtonVisible(false);  // Hide cancel quest button
+        initialiseMapWithQuests();  // Return map to showing quests, not current quest's objectives
+        addQuestsToSheet();         // Add quests back to the BottomSheet
+        recenterMapOnUser();        // Move the map to the user's location
     }
 
     public void completeQuest() {
@@ -306,47 +343,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } else {
             btnCancelQuest.setVisibility(View.GONE);
         }
-    }
-
-    public void updateObjectivesView() {
-        LinearLayout scrollContainer = findViewById(R.id.scroll_container);
-        scrollContainer.removeAllViews(); // Clear existing views
-
-        Quest currentQuest = questController.getCurrentQuest();
-        boolean foundNextObjective = false;
-
-        if (currentQuest != null) {
-            for (Objective objective : currentQuest.getQuestPath()) {
-                View objectiveView = LayoutInflater.from(this).inflate(R.layout.scroll_item, scrollContainer, false);
-                TextView title = objectiveView.findViewById(R.id.scroll_title);
-                TextView description = objectiveView.findViewById(R.id.scroll_description);
-
-                title.setText(objective.getName());
-                description.setText(objective.getDescription());
-
-                // If this objective is complete or we have already found the next objective,
-                // grey out the text.
-                if (objective.isComplete() || foundNextObjective) {
-                    title.setTextColor(getResources().getColor(R.color.greyText)); // Make sure you define greyText in your colors.xml
-                    description.setTextColor(getResources().getColor(R.color.greyText));
-                } else {
-                    // This is the next incomplete objective.
-                    foundNextObjective = true; // Mark that we've found the next objective so all others will be greyed out.
-                }
-
-                scrollContainer.addView(objectiveView, 0); // Add next objective at the top of the list
-
-                // Once the next incomplete objective has been added, break to stop adding more.
-                if (foundNextObjective) break;
-            }
-        }
-    }
-
-    private void clearQuestMarkers() {
-        for (Marker marker : markerQuestMap.keySet()) {
-            marker.remove();
-        }
-        markerQuestMap.clear();
     }
 
     public void updateMapObjective(Objective objective) {
