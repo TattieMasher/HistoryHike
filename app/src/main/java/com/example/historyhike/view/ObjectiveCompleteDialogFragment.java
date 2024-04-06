@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -17,11 +18,13 @@ import com.google.android.material.button.MaterialButton;
 
 public class ObjectiveCompleteDialogFragment extends DialogFragment {
 
-    public static ObjectiveCompleteDialogFragment newInstance(String title, String description) {
+    // Update newInstance to include an imageResourceId parameter
+    public static ObjectiveCompleteDialogFragment newInstance(String title, String description, int imageResourceId) {
         ObjectiveCompleteDialogFragment frag = new ObjectiveCompleteDialogFragment();
         Bundle args = new Bundle();
         args.putString("title", title);
         args.putString("description", description);
+        args.putInt("imageResourceId", imageResourceId); // Add this line
         frag.setArguments(args);
         return frag;
     }
@@ -36,24 +39,18 @@ public class ObjectiveCompleteDialogFragment extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         String title = getArguments().getString("title", "Objective Completed");
         String description = getArguments().getString("description", "");
+        int imageResourceId = getArguments().getInt("imageResourceId");
 
+        // Populate UI elements with the supplied data
         TextView titleView = view.findViewById(R.id.obj_dialog_title);
         TextView descriptionView = view.findViewById(R.id.obj_dialog_description);
+        ImageView imageView = view.findViewById(R.id.obj_dialog_image);
         MaterialButton closeButton = view.findViewById(R.id.close_objective_dialog);
 
         titleView.setText(title);
         descriptionView.setText(description);
+        imageView.setImageResource(imageResourceId); // Set the image resource
 
         closeButton.setOnClickListener(v -> dismiss());
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        Dialog dialog = getDialog();
-        if (dialog != null) {
-            dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        }
     }
 }

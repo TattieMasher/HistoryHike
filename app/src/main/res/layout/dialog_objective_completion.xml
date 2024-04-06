@@ -20,10 +20,10 @@
             android:text="LOL"
             android:textColor="@color/black"></TextView>
         <ImageView
+            android:id="@+id/obj_dialog_image"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:scaleType="centerCrop"
-            android:src="@drawable/img"
             ></ImageView>
         <TextView
             android:id="@+id/obj_dialog_description"

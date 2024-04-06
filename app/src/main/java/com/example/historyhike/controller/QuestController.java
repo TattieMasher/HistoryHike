@@ -123,13 +123,14 @@ public class QuestController implements ProximityListener {
             currentObjective.setComplete(true);
 
             if (currentObjectiveIndex < currentQuest.getQuestPath().size() - 1) {
+                // Update objectives list from view
+                mapsActivity.completeObjective();
+                // Increment current objective AFTERWARDS, so that UI can update elements with prev objective completion first
                 currentObjectiveIndex++;
                 // Fetch the next objective after incrementing the index
                 Objective nextObjective = getCurrentObjective();
                 // Update the map with the *next* objective
                 mapsActivity.runOnUiThread(() -> mapsActivity.updateMapObjective(nextObjective));
-                // Update objectives list from view
-                mapsActivity.completeObjective();
             } else {
                 // All objectives completed
                 completeQuest();

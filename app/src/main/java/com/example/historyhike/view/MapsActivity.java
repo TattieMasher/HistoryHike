@@ -226,11 +226,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void completeObjective() {
         // Assuming you have a title and description for the completed objective
-        String title = "Complete!";
-        String description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc sagittis odio gravida, scelerisque nulla a, tristique lacus. Suspendisse fringilla arcu ac lobortis molestie. Sed quis nibh venenatis, dictum ante eu, egestas massa. Vestibulum venenatis lacinia mollis. Praesent tempus eleifend auctor. \\n\\n\n" +
-                "Pellentesque eget magna arcu. Integer eget libero lectus. Morbi vitae metus in odio tempor efficitur vitae eget odio. Donec sit amet nibh dui. Phasellus dui turpis, hendrerit eget aliquam non, ultricies vitae dolor. Integer semper faucibus nisi, sit amet pellentesque orci iaculis at.";
+        String title = questController.getCurrentObjective().getName();
+        String description = questController.getCurrentObjective().getDescription();
         // TODO: New lines don't work
-        ObjectiveCompleteDialogFragment dialogFragment = ObjectiveCompleteDialogFragment.newInstance(title, description);
+        int image = R.drawable.objective2;
+
+        ObjectiveCompleteDialogFragment dialogFragment = ObjectiveCompleteDialogFragment.newInstance(title, description, image);
         dialogFragment.show(getSupportFragmentManager(), "objectiveCompleteDialog");
         updateObjectivesView();
     }
