@@ -56,6 +56,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         geolocationController = new GeolocationController(this, geolocation);
         geolocationController.setLocationUpdateListener(this); // Set MapsActivity as the location listener
 
+        Button btnCancelQuest = findViewById(R.id.btnCancelQuest);
+
+        btnCancelQuest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cancelQuest();
+            }
+        });
+
         // test quest3, with objectives
         Objective obj5 = new Objective(1, 55.6057023352494, -4.496883453828011, "Home", "desc");
         Objective obj6 = new Objective(1, 55.604129221001536, -4.496313879389737, "Mc'D's", "desc");
