@@ -36,7 +36,13 @@ public class QuestController implements ProximityListener {
         checkAndUpdateObjectiveBasedOnProximity(location);
     }
 
+    public Quest getCurrentQuest() {
+        return currentQuest;
+    }
 
+    public void setCurrentQuest(Quest currentQuest) {
+        this.currentQuest = currentQuest;
+    }
 
     // Gets the starting points of all quests
     public ArrayList<Objective> getStartingPoints() {
@@ -122,6 +128,8 @@ public class QuestController implements ProximityListener {
                 Objective nextObjective = getCurrentObjective();
                 // Update the map with the *next* objective
                 mapsActivity.runOnUiThread(() -> mapsActivity.updateMapObjective(nextObjective));
+                // Update objectives list from view
+                mapsActivity.updateObjectivesView();
             } else {
                 // All objectives completed
                 completeQuest();

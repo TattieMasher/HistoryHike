@@ -12,6 +12,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <!-- Cancel Quest Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnCancelQuest"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cancel Quest"
+        android:fontFamily="@font/lora_bold"
+        android:layout_margin="16dp"
+        app:layout_anchor="@id/map"
+        app:layout_anchorGravity="top|start"
+        android:visibility="gone"
+        />
+
     <!-- BottomSheet -->
     <LinearLayout
         android:id="@+id/bottom_sheet"
@@ -74,7 +87,7 @@
             android:fillViewport="true"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
             <LinearLayout
-                android:id="@+id/quest_container"
+                android:id="@+id/scroll_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@color/scroll_background"

@@ -4,4 +4,5 @@
     <color name="white">#FFFFFFFF</color>
     <color name="main_blue">#4C8076</color>
     <color name="scroll_background">#d6ceb3</color>
+    <color name="greyText">#9E9E9E</color>
 </resources>

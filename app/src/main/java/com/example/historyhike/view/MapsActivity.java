@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -67,38 +68,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         quest3.setQuestPath(path3);
 
         museum = new Museum();
-        allAvailableQuests.add(quest3);
+        allAvailableQuests.add(quest3); // This will be obtained from QuestController once structure is complete
         questController = new QuestController(allAvailableQuests, museum);
 
-        // Get reference to quest container from Activity_maps xml
-        LinearLayout scrollContainer = findViewById(R.id.quest_container);
-
-        // Iterate over test quests (TODO: from live db, obviously)
-        for (Quest quest : allAvailableQuests) {
-            // Inflate the quest item layout into quest container
-            View questItem = LayoutInflater.from(this).inflate(R.layout.scroll_item, scrollContainer, false);
-
-            // Set the title and description
-            TextView title = questItem.findViewById(R.id.scroll_title);
-            TextView description = questItem.findViewById(R.id.scroll_description);
-            title.setText(quest.getTitle());
-            description.setText(quest.getDescription());
-
-            questItem.setOnClickListener(view -> {
-                // Retrieve the first objective of the clicked quest
-                Objective firstObjective = quest.getQuestPath().get(0);
-                double lat = firstObjective.getLatitude();
-                double lng = firstObjective.getLongitude();
-
-                // Collapse the bottom sheet when quest is clicked
-                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-
-                // Set map to location of first obj on clicked quest
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 20)); // Adjust zoom level as needed
-            });
-
-            // Add the inflated view to the quest container
-            scrollContainer.addView(questItem);
+        if(questController.getCurrentQuest() == null) {
+            addQuestsToSheet(); // currently uses allAvailableQuests field
+        } else {
+            addObjectivesToSheet();
         }
 
         // Find the map asynchronously
@@ -143,6 +119,69 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
+    private void addQuestsToSheet() {
+        // Get reference to quest container from Activity_maps xml
+        LinearLayout scrollContainer = findViewById(R.id.scroll_container);
+
+        for (Quest quest : allAvailableQuests) {
+            // Inflate the quest item layout into quest container
+            View questItem = LayoutInflater.from(this).inflate(R.layout.scroll_item, scrollContainer, false);
+
+            // Set the title and description
+            TextView title = questItem.findViewById(R.id.scroll_title);
+            TextView description = questItem.findViewById(R.id.scroll_description);
+            title.setText(quest.getTitle());
+            description.setText(quest.getDescription());
+
+            questItem.setOnClickListener(view -> {
+                // Retrieve the first objective of the clicked quest
+                Objective firstObjective = quest.getQuestPath().get(0);
+                double lat = firstObjective.getLatitude();
+                double lng = firstObjective.getLongitude();
+
+                // Collapse the bottom sheet when quest is clicked
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+                // Set map to location of first obj on clicked quest
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 20)); // Adjust zoom level as needed
+            });
+
+            // Add the inflated view to the quest container
+            scrollContainer.addView(questItem);
+        }
+    }
+
+    private void addObjectivesToSheet() {
+        // Get reference to quest container from Activity_maps xml
+        LinearLayout scrollContainer = findViewById(R.id.scroll_container);
+
+        for(Objective obj : questController.getCurrentQuest().getQuestPath()) {
+            // Inflate the quest item layout into quest container
+            View objItem = LayoutInflater.from(this).inflate(R.layout.scroll_item, scrollContainer, false);
+
+            // Set the title and description
+            TextView title = objItem.findViewById(R.id.scroll_title);
+            TextView description = objItem.findViewById(R.id.scroll_description);
+            title.setText(obj.getName());
+            description.setText(obj.getDescription());
+
+            objItem.setOnClickListener(view -> {
+                // Get the location of the clicked objective
+                double lat = obj.getLatitude();
+                double lng = obj.getLongitude();
+
+                // Collapse the bottom sheet when obj is clicked
+                bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+
+                // Set map to location obj when clicked
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 20)); // Adjust zoom level as needed
+            });
+
+            // Add the inflated view to the quest container
+            scrollContainer.addView(objItem);
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -185,7 +224,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -223,9 +261,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .setTitle(quest.getTitle())
                 .setMessage(quest.getLongDescription())
                 .setPositiveButton("Accept", (dialogInterface, i) -> {
-                    questController.startQuest(quest);
-                    clearQuestMarkers();
-                    recenterMapOnUser();
+                    acceptQuest(quest);
                 })
                 .setNegativeButton("Decline", (dialogInterface, i) -> {
                     recenterMapOnUser();
@@ -233,17 +269,81 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .show();
     }
 
+    private void acceptQuest(Quest quest) {
+        questController.startQuest(quest);
+        clearQuestMarkers();
+        recenterMapOnUser();
+        updateObjectivesView();
+        cancelButtonVisible(true); // Show cancel quest button
+    }
+
+    public void cancelQuest() {
+        questController.cancelQuest();
+        // Hide the cancel button
+        cancelButtonVisible(true);  // Hide cancel quest button
+    }
+
+    public void completeQuest() {
+        // Complete the quest...
+        questController.completeQuest();
+        // Hide the cancel button
+        cancelButtonVisible(false);  // Hide cancel quest button
+    }
+
+    private void cancelButtonVisible(boolean visible) {
+        Button btnCancelQuest = findViewById(R.id.btnCancelQuest);
+        if(visible) {
+            btnCancelQuest.setVisibility(View.VISIBLE);
+        } else {
+            btnCancelQuest.setVisibility(View.GONE);
+        }
+    }
+
+    public void updateObjectivesView() {
+        LinearLayout scrollContainer = findViewById(R.id.scroll_container);
+        scrollContainer.removeAllViews(); // Clear existing views
+
+        Quest currentQuest = questController.getCurrentQuest();
+        boolean foundNextObjective = false;
+
+        if (currentQuest != null) {
+            for (Objective objective : currentQuest.getQuestPath()) {
+                View objectiveView = LayoutInflater.from(this).inflate(R.layout.scroll_item, scrollContainer, false);
+                TextView title = objectiveView.findViewById(R.id.scroll_title);
+                TextView description = objectiveView.findViewById(R.id.scroll_description);
+
+                title.setText(objective.getName());
+                description.setText(objective.getDescription());
+
+                // If this objective is complete or we have already found the next objective,
+                // grey out the text.
+                if (objective.isComplete() || foundNextObjective) {
+                    title.setTextColor(getResources().getColor(R.color.greyText)); // Make sure you define greyText in your colors.xml
+                    description.setTextColor(getResources().getColor(R.color.greyText));
+                } else {
+                    // This is the next incomplete objective.
+                    foundNextObjective = true; // Mark that we've found the next objective so all others will be greyed out.
+                }
+
+                scrollContainer.addView(objectiveView, 0); // Add next objective at the top of the list
+
+                // Once the next incomplete objective has been added, break to stop adding more.
+                if (foundNextObjective) break;
+            }
+        }
+    }
+
     private void clearQuestMarkers() {
         for (Marker marker : markerQuestMap.keySet()) {
-            marker.remove(); // Remove the marker from the map
+            marker.remove();
         }
-        markerQuestMap.clear(); // Clear the map for future use
+        markerQuestMap.clear();
     }
 
     public void updateMapObjective(Objective objective) {
         if (objective != null) {
             LatLng objectiveLocation = new LatLng(objective.getLatitude(), objective.getLongitude());
-            mMap.clear(); // Consider preserving certain markers if needed
+            mMap.clear();
             mMap.addMarker(new MarkerOptions().position(objectiveLocation).title(objective.getDescription()));
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(objectiveLocation, DEFAULT_ZOOM));
         }
