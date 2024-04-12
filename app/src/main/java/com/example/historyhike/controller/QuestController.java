@@ -17,14 +17,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class QuestController implements ProximityListener {
-    private List<Quest> availableQuests;
+    private ArrayList<Quest> availableQuests;
     private Quest currentQuest;
     private int currentObjectiveIndex;
     private Museum museum;      // Coupled to museum. Maybe not ideal...
     private MapsActivity mapsActivity;
     final float PROXIMITY_THRESHOLD = 30; // TODO: Revise the proximity
 
-    public QuestController(List<Quest> availableQuests, Museum museum) {
+    public QuestController(ArrayList<Quest> availableQuests, Museum museum) {
         this.availableQuests = availableQuests;
         this.museum = museum;
         this.currentQuest = null; // No current quest initially
@@ -37,6 +37,14 @@ public class QuestController implements ProximityListener {
     @Override
     public void onProximityCheck(Location location) {
         checkAndUpdateObjectiveBasedOnProximity(location);
+    }
+
+    public ArrayList<Quest> getAvailableQuests() {
+        return availableQuests;
+    }
+
+    public void setAvailableQuests(ArrayList<Quest> availableQuests) {
+        this.availableQuests = availableQuests;
     }
 
     public Quest getCurrentQuest() {
@@ -117,7 +125,7 @@ public class QuestController implements ProximityListener {
         float distanceInMeters = results[0];
 
         if (distanceInMeters <= PROXIMITY_THRESHOLD) {
-            completeObjective(); // TODO: notify the view
+            completeObjective();
         }
 
         Log.d("ProximityCheck", "Distance to objective: " + distanceInMeters + " meters.");
