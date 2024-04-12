@@ -15,6 +15,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import com.example.historyhike.R;
+import com.example.historyhike.controller.ApiController;
 import com.example.historyhike.controller.GeolocationController;
 import com.example.historyhike.controller.QuestController;
 import com.example.historyhike.model.Geolocation;
@@ -39,6 +40,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private BottomSheetBehavior bottomSheetBehavior;
     private GeolocationController geolocationController;
     private final int LOCATION_PERMISSION_REQUEST_CODE = 1000; // Must match GeolocationController
+    private ApiController apiController;
     private QuestController questController;
     private Museum museum; // TODO: Re-visit. Slightly breaks MVC as this is a model, but its functionality is so simple that an extra controller may overcomplicate
     private boolean isFirstLocated = false;
@@ -51,8 +53,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setUpContentView();         // Set up activity and map within
         initialiseComponents();     // Initialise some dynamic components
+        initialiseControllers();    // Initialise the geolocation, quest and api controllers
         testQuests();               // Create test quests and populate them, to test as we go
-        initialiseControllers();    // Initialise the geolocation and quest controllers
 
         // Request permissions, if necessary
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -83,22 +85,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void testQuests(){
-        // test quest3, with objectives
-        Objective obj5 = new Objective(1, 55.6057023352494, -4.496883453828011, "Home", "desc");
-        Objective obj6 = new Objective(1, 55.604129221001536, -4.496313879389737, "Mc'D's", "desc");
-        ArrayList<Objective> path3 = new ArrayList<>();
-        obj5.setImageURL("https://historyhike.alex-mccaughran.net/objective1.png");
-        obj6.setImageURL("https://historyhike.alex-mccaughran.net/objective2.png");
-        path3.add(obj5);
-        path3.add(obj6);
-        Quest quest3 = new Quest();
-        quest3.setTitle("Test me");
-        quest3.setDescription("From home to McDonald's. A Quest well completed.");
-        quest3.setQuestPath(path3);
-
-        museum = new Museum();
-        allAvailableQuests.add(quest3); // This will be obtained from QuestController once structure is complete
-        questController = new QuestController(allAvailableQuests, museum);
+        questController.setAvailableQuests(apiController.fetchTestQuests());
     }
 
     private void setUpContentView() {
@@ -125,21 +112,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void initialiseControllers() {
-        Geolocation geolocation = new Geolocation();
+        museum = new Museum(); // Instantiate a Museum - TODO: MVC?
+        apiController = new ApiController(); // Instantiate ApiController
+        questController = new QuestController(new ArrayList<>(), museum); // Initialise with an initially empty list
 
-        geolocationController = new GeolocationController(this, geolocation);
+        geolocationController = new GeolocationController(this, new Geolocation());
         geolocationController.setLocationUpdateListener(this); // Set MapsActivity as the location listener
+        geolocationController.setProximityListener(questController); // Set QuestController as the proximity listener
 
         if(questController.getCurrentQuest() == null) {
-            addQuestsToSheet(); // currently uses allAvailableQuests field
+            addQuestsToSheet(); // If no quest in progress, show quests in BottomSheet
         } else {
-            updateObjectivesView();
+            updateObjectivesView(); // Otherwise, show objectives TODO: Persist current quest state and show objectives on map also (onMapReady)
         }
-
-        // Set QuestController's map reference to this activity
-        questController.setMapsActivity(this);
-
-        geolocationController.setProximityListener(questController);
     }
 
     private void initialiseBottomSheetBehavior() {
@@ -176,7 +161,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.clear(); // Clear any previous markers to re-draw
 
         // Loop through available quests to add their first objective as a marker
-        for (Quest quest : allAvailableQuests) {
+        for (Quest quest : questController.getAvailableQuests()) {
             Objective startingPoint = quest.getQuestPath().get(0); // Get the fist objective
             LatLng position = new LatLng(startingPoint.getLatitude(), startingPoint.getLongitude()); // Get its location
             Marker marker = mMap.addMarker(new MarkerOptions().position(position).title(quest.getTitle())); // Create a marker for it
@@ -198,7 +183,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LinearLayout scrollContainer = findViewById(R.id.scroll_container);
         scrollContainer.removeAllViews(); // Clear the container of any remaining views
 
-        for (Quest quest : allAvailableQuests) {
+        for (Quest quest : questController.getAvailableQuests()) {
             // Inflate the quest item layout into quest container
             View questItem = LayoutInflater.from(this).inflate(R.layout.scroll_item, scrollContainer, false);
 
