@@ -91,15 +91,21 @@ public class QuestController implements ProximityListener {
 
 
     public void completeQuest() {
+        Log.d("QuestDebug", "Completing quest now");
         if (currentQuest != null) {
-            // Set the quest state to COMPLETED
             currentQuest.setState(Quest.QuestState.COMPLETED);
-            // Add the reward to the museum
-            museum.addArtefact(currentQuest.getReward());
-            currentQuest = null; // Reset current quest
-            currentObjectiveIndex = -1; // Reset current objective index
+            // museum.addArtefact(currentQuest.getReward()); TODO: Currently breaks app flow
+            currentQuest = null;
+            currentObjectiveIndex = -1;
+            Log.d("QuestDebug", "Quest completed, state reset");
+
+        } else {
+            Log.d("QuestDebug", "Attempted to complete a null quest");
         }
+        mapsActivity.cancelQuest(); // TODO: Revise this? This is currently just used to reset the maps UI so that no quest-in-progress related elements are there.
     }
+
+
 
     public void cancelQuest() {
         if (currentQuest != null && currentQuest.getState() == Quest.QuestState.IN_PROGRESS) {
@@ -110,13 +116,20 @@ public class QuestController implements ProximityListener {
     }
 
     public void checkAndUpdateObjectiveBasedOnProximity(Location currentLocation) {
-        if (currentQuest == null || currentObjectiveIndex < 0 || currentObjectiveIndex >= currentQuest.getQuestPath().size()) {
-            return; // No active quest or invalid objective index
+        if (currentQuest == null) {
+            Log.d("ProximityCheck", "No active quest. Skipping proximity check.");
+            return;
+        }
+
+        if (currentObjectiveIndex < 0 || currentObjectiveIndex >= currentQuest.getQuestPath().size()) {
+            Log.d("ProximityCheck", "Invalid objective index. Skipping proximity check.");
+            return;
         }
 
         Objective currentObjective = getCurrentObjective();
         if (currentObjective == null) {
-            return; // TODO: Handle this error case
+            Log.d("ProximityCheck", "Current objective is null. Skipping proximity check.");
+            return;
         }
 
         float[] results = new float[1];
@@ -124,14 +137,12 @@ public class QuestController implements ProximityListener {
                 currentObjective.getLatitude(), currentObjective.getLongitude(), results);
         float distanceInMeters = results[0];
 
+        Log.d("ProximityCheck", "Distance to objective: " + distanceInMeters + " meters. Objective: " + currentObjective.getName());
+
         if (distanceInMeters <= PROXIMITY_THRESHOLD) {
             completeObjective();
         }
-
-        Log.d("ProximityCheck", "Distance to objective: " + distanceInMeters + " meters.");
-        Log.d("ProximityCheck", currentQuest.getTitle() + ": " + currentObjective.getName());
     }
-
 
     public Objective getCurrentObjective() {
         if (currentQuest != null && currentObjectiveIndex >= 0) { // set by startQuest
@@ -141,22 +152,31 @@ public class QuestController implements ProximityListener {
     }
 
     public void completeObjective() {
-        if (currentQuest != null && currentObjectiveIndex >= 0) {
-            Objective currentObjective = currentQuest.getQuestPath().get(currentObjectiveIndex);
-            currentObjective.setComplete(true);
+        Log.d("QuestDebug", "Attempting to complete objective at index: " + currentObjectiveIndex);
+        if (currentQuest == null || currentObjectiveIndex < 0 || currentObjectiveIndex >= currentQuest.getQuestPath().size()) {
+            Log.d("QuestDebug", "Invalid quest or index");
+            return;
+        }
 
-            if (currentObjectiveIndex < currentQuest.getQuestPath().size() - 1) {
-                // Update objectives list from view
-                mapsActivity.completeObjective();
-                // Increment current objective AFTERWARDS, so that UI can update elements with prev objective completion first
-                currentObjectiveIndex++;
-                // Fetch the next objective after incrementing the index
-                Objective nextObjective = getCurrentObjective();
-                // Update the map with the *next* objective
+        Objective currentObjective = getCurrentObjective();
+        if (currentObjective == null) {
+            Log.d("QuestDebug", "Current objective is null");
+            return;
+        }
+
+        currentObjective.setComplete(true);
+        Log.d("QuestDebug", "Objective marked as complete");
+
+        if (currentObjectiveIndex == currentQuest.getQuestPath().size() - 1) {
+            Log.d("QuestDebug", "Last objective completed, completing quest");
+            mapsActivity.completeObjective();
+            completeQuest();
+        } else {
+            mapsActivity.completeObjective();
+            currentObjectiveIndex++;
+            Objective nextObjective = getCurrentObjective();
+            if (nextObjective != null) {
                 mapsActivity.runOnUiThread(() -> mapsActivity.updateMapObjective(nextObjective));
-            } else {
-                // All objectives completed
-                completeQuest();
             }
         }
     }

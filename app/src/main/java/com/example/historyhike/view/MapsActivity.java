@@ -324,13 +324,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         recenterMapOnUser();        // Move the map to the user's location
     }
 
-    public void completeQuest() {
-        // Complete the quest...
-        questController.completeQuest();
-        // Hide the cancel button
-        cancelButtonVisible(false);  // Hide cancel quest button
-    }
-
     private void cancelButtonVisible(boolean visible) {
         Button btnCancelQuest = findViewById(R.id.btnCancelQuest);
         if(visible) {
