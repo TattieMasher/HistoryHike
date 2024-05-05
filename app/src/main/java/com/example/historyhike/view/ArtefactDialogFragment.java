@@ -1,10 +1,5 @@
 package com.example.historyhike.view;
 
-import android.app.Activity;
-import android.app.Dialog;
-import android.content.DialogInterface;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,22 +14,21 @@ import com.bumptech.glide.Glide;
 import com.example.historyhike.R;
 import com.google.android.material.button.MaterialButton;
 
-public class ObjectiveCompleteDialogFragment extends DialogFragment {
-
-    // Now using imageURL string
-    public static ObjectiveCompleteDialogFragment newInstance(String title, String description, String imageURL) {
-        ObjectiveCompleteDialogFragment frag = new ObjectiveCompleteDialogFragment();
+public class ArtefactDialogFragment extends DialogFragment {
+    public static ArtefactDialogFragment newInstance(String title, String description, String imageUrl) {
+        ArtefactDialogFragment frag = new ArtefactDialogFragment();
         Bundle args = new Bundle();
         args.putString("title", title);
         args.putString("description", description);
-        args.putString("imageURL", imageURL);
+        args.putString("imageURL", imageUrl);
         frag.setArguments(args);
         return frag;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.dialog_objective_completion, container, false);
+        View view = inflater.inflate(R.layout.artefact_dialog, container, false);
+        return view;
     }
 
     @Override
@@ -44,10 +38,10 @@ public class ObjectiveCompleteDialogFragment extends DialogFragment {
         String description = getArguments().getString("description", "");
         String imageURL = getArguments().getString("imageURL"); // Retrieve the image URL
 
-        TextView titleView = view.findViewById(R.id.obj_dialog_title);
-        TextView descriptionView = view.findViewById(R.id.obj_dialog_description);
-        ImageView imageView = view.findViewById(R.id.obj_dialog_image);
-        MaterialButton closeButton = view.findViewById(R.id.close_objective_dialog);
+        TextView titleView = view.findViewById(R.id.artefact_title);
+        TextView descriptionView = view.findViewById(R.id.artefact_description);
+        ImageView imageView = view.findViewById(R.id.artefact_image);
+        MaterialButton closeButton = view.findViewById(R.id.close_artefact_dialog);
 
         titleView.setText(title);
         descriptionView.setText(description);
@@ -55,14 +49,4 @@ public class ObjectiveCompleteDialogFragment extends DialogFragment {
 
         closeButton.setOnClickListener(v -> dismiss());
     }
-
-    @Override
-    public void onDismiss(DialogInterface dialogInterface) {
-        super.onDismiss(dialogInterface);
-        Activity activity = getActivity();
-        if (activity instanceof MapsActivity) {
-            ((MapsActivity) activity).showArtefactDialog();
-        }
-    }
-
 }

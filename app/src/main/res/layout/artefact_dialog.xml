@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/objective_dialog_background"
+    android:layout_gravity="center"
+    android:layout_marginLeft="10dp"
+    android:layout_marginRight="10dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+
+    >
+        <TextView
+            android:id="@+id/artefact_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/lora_bold"
+            android:textSize="50dp"
+            android:text="LOL"
+            android:textColor="@color/black"></TextView>
+        <ImageView
+            android:id="@+id/artefact_image"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop"
+            ></ImageView>
+        <TextView
+            android:id="@+id/artefact_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc sagittis odio gravida, scelerisque nulla a, tristique lacus. Suspendisse fringilla arcu ac lobortis molestie. Sed quis nibh venenatis, dictum ante eu, egestas massa. Vestibulum venenatis lacinia mollis. Praesent tempus eleifend auctor. \n\n
+Pellentesque eget magna arcu. Integer eget libero lectus. Morbi vitae metus in odio tempor efficitur vitae eget odio. Donec sit amet nibh dui. Phasellus dui turpis, hendrerit eget aliquam non, ultricies vitae dolor. Integer semper faucibus nisi, sit amet pellentesque orci iaculis at."
+            android:textColor="@color/black"></TextView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/close_artefact_dialog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/main_blue"
+            android:text="Add to Museum"
+            android:layout_gravity="end">
+
+        </com.google.android.material.button.MaterialButton>
+</LinearLayout>

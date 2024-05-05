@@ -6,10 +6,18 @@ public class Museum {
     private ArrayList<Artefact> artefacts;
 
     public Museum() {
-        this.artefacts = null;
+        this.artefacts = new ArrayList<>();
     }
 
     public Museum(ArrayList<Artefact> artefacts) {
+        this.artefacts = artefacts;
+    }
+
+    public ArrayList<Artefact> getArtefacts() {
+        return artefacts;
+    }
+
+    public void setArtefacts(ArrayList<Artefact> artefacts) {
         this.artefacts = artefacts;
     }
 

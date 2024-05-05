@@ -92,7 +92,9 @@ public class QuestController implements ProximityListener {
 
     public void completeQuest() {
         Log.d("QuestDebug", "Completing quest now");
+        mapsActivity.setLastObjComplete(true);
         if (currentQuest != null) {
+            mapsActivity.getMuseumController().addArtefact(currentQuest.getReward());
             currentQuest.setState(Quest.QuestState.COMPLETED);
             // museum.addArtefact(currentQuest.getReward()); TODO: Currently breaks app flow
             currentQuest = null;

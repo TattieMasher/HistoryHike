@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -17,7 +18,9 @@ import androidx.fragment.app.FragmentActivity;
 import com.example.historyhike.R;
 import com.example.historyhike.controller.ApiController;
 import com.example.historyhike.controller.GeolocationController;
+import com.example.historyhike.controller.MuseumController;
 import com.example.historyhike.controller.QuestController;
+import com.example.historyhike.model.Artefact;
 import com.example.historyhike.model.Geolocation;
 import com.example.historyhike.model.Museum;
 import com.example.historyhike.model.Objective;
@@ -42,11 +45,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private final int LOCATION_PERMISSION_REQUEST_CODE = 1000; // Must match GeolocationController
     private ApiController apiController;
     private QuestController questController;
+    private MuseumController museumController;
     private Museum museum; // TODO: Re-visit. Slightly breaks MVC as this is a model, but its functionality is so simple that an extra controller may overcomplicate
     private boolean isFirstLocated = false;
+    private boolean isLastObjComplete = false;
     ArrayList<Quest> allAvailableQuests = new ArrayList<>(); // TODO: This will come from my API, eventually
     private HashMap<Marker, Quest> markerQuestMap = new HashMap<>(); // Used to store quest-objective pairs to display from objective references within the map
     private final int DEFAULT_ZOOM = 18;
+
+    public MuseumController getMuseumController() { // Necessary for adding artefacts through questController
+        return museumController;
+    }
+
+    public boolean isLastObjComplete() {
+        return isLastObjComplete;
+    } // necessary for showing artefact completion dialog ONLY when final obj is complete
+
+    public void setLastObjComplete(boolean lastObjComplete) {
+        isLastObjComplete = lastObjComplete;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,7 +129,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void initialiseControllers() {
-        museum = new Museum(); // Instantiate a Museum - TODO: MVC?
+        museumController = new MuseumController();
         apiController = new ApiController(); // Instantiate ApiController
         questController = new QuestController(new ArrayList<>(), museum); // Initialise with an initially empty list
 
@@ -221,6 +238,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ObjectiveCompleteDialogFragment dialogFragment = ObjectiveCompleteDialogFragment.newInstance(title, description, imageURL);
         dialogFragment.show(getSupportFragmentManager(), "objectiveCompleteDialog");
         updateObjectivesView();
+        isLastObjComplete = false;
+    }
+
+    public void showArtefactDialog() {
+        if(isLastObjComplete) {
+            ArtefactDialogFragment artefactDialog = ArtefactDialogFragment.newInstance(
+                    museumController.getLastArtefact().getName(),
+                    museumController.getLastArtefact().getDescription(),
+                    museumController.getLastArtefact().getImageUrl()
+            );
+            artefactDialog.show(getSupportFragmentManager(), "ArtefactDialog");
+        } else {
+            Log.d("DialogDebug", "Trying to show artefact dialog for non-complete quest. Quest:" + questController.getCurrentQuest());
+        }
     }
 
     private void updateObjectivesView() {
