@@ -2,6 +2,7 @@ package com.example.historyhike.view;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -123,6 +124,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 cancelQuest();
             }
         });
+
+        LinearLayout museumLayout = findViewById(R.id.museum_layout);
+        museumLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MapsActivity.this, MuseumActivity.class);
+                startActivity(intent);
+            }
+        }); // Open museum when that part of the bootmsheet is clicked
+
 
         scrollTitle.setText(getString(R.string.scroll_quest_title)); // Already set in XML anyway, but just to be sure
         initialiseBottomSheetBehavior();    // Allow expected BottomSheet behaviour
