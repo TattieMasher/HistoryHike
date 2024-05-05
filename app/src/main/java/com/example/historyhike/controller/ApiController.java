@@ -1,5 +1,6 @@
 package com.example.historyhike.controller;
 
+import com.example.historyhike.model.Artefact;
 import com.example.historyhike.model.Objective;
 import com.example.historyhike.model.Quest;
 
@@ -25,6 +26,9 @@ public class ApiController {
         quest.setTitle("Test me");
         quest.setDescription("From home to McDonald's. A Quest well completed.");
         quest.setQuestPath(path);
+
+        Artefact artefact = new Artefact(1, "Burger", "mmm, tasty", "https://historyhike.alex-mccaughran.net/artefact.png");
+        quest.setReward(artefact);
 
         quests.add(quest);
         return quests;
