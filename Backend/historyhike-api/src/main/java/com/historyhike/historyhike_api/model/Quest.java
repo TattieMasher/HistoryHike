@@ -1,7 +1,8 @@
 package com.historyhike.historyhike_api.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import java.util.List;
 
 @Entity
 @Table(name = "quest")
@@ -23,11 +24,18 @@ public class Quest {
     @JsonManagedReference
     private Artefact artefact;
 
+    @ManyToMany
+    @JoinTable(
+            name = "quest_objective",
+            joinColumns = @JoinColumn(name = "quest_id"),
+            inverseJoinColumns = @JoinColumn(name = "objective_id")
+    )
+    private List<Objective> objectives;
+
     public Quest() {
     }
 
     // Getters and Setters
-
     public int getId() {
         return id;
     }
@@ -74,8 +82,14 @@ public class Quest {
 
     public void setArtefact(Artefact artefact) {
         this.artefact = artefact;
-        if (artefact != null) {
-            artefact.setQuest(this);
-        }
+        artefact.setQuest(this);
+    }
+
+    public List<Objective> getObjectives() {
+        return objectives;
+    }
+
+    public void setObjectives(List<Objective> objectives) {
+        this.objectives = objectives;
     }
 }

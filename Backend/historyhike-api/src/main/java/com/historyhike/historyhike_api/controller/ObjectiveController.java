@@ -1,7 +1,7 @@
 package com.historyhike.historyhike_api.controller;
 
-import com.historyhike.historyhike_api.model.Quest;
-import com.historyhike.historyhike_api.repository.QuestRepository;
+import com.historyhike.historyhike_api.model.Objective;
+import com.historyhike.historyhike_api.repository.ObjectiveRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,17 +14,17 @@ import java.util.List;
 
 @RestController
 @CrossOrigin("*")
-@RequestMapping("/quest")
-public class QuestController {
+@RequestMapping("/objective")
+public class ObjectiveController {
     @Autowired
-    private QuestRepository questRepository;
+    private ObjectiveRepository objectiveRepository;
 
     @GetMapping("/all")
-    public ResponseEntity<List<Quest>> getAll() {
-        List<Quest> quests = questRepository.findAll();
-        if (quests == null) {
+    private ResponseEntity<List<Objective>> getAll() {
+        List<Objective> objectives = objectiveRepository.findAll();
+        if (objectives == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(quests);
+        return ResponseEntity.ok(objectives);
     }
 }
