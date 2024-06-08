@@ -11,9 +11,13 @@ public class User {
     private int id;
 
     private String email;
-    @JsonIgnore
+
+    @Column(name = "password_hash")
     private String passwordHash;
+
+    @Column(name = "first_name")
     private String firstName;
+
     private String surname;
 
     public User() {

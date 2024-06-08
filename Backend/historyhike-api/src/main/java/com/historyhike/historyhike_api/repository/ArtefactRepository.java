@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ArtefactRepository extends JpaRepository<Artefact, Integer> {
+    Artefact findByQuestId(int questId);
 }
