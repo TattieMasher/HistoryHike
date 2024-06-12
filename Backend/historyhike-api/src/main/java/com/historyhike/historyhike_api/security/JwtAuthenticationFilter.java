@@ -1,6 +1,6 @@
 package com.historyhike.historyhike_api.security;
 
-import com.historyhike.historyhike_api.service.UserDetailsServiceImpl;
+import com.historyhike.historyhike_api.security.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

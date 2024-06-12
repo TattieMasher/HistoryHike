@@ -1,4 +1,4 @@
-package com.historyhike.historyhike_api.service;
+package com.historyhike.historyhike_api.security;
 
 import com.historyhike.historyhike_api.model.User;
 import com.historyhike.historyhike_api.repository.UserRepository;
