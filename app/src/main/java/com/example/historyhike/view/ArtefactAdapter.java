@@ -38,6 +38,7 @@ public class ArtefactAdapter extends RecyclerView.Adapter<ArtefactAdapter.Artefa
     public void onBindViewHolder(@NonNull ArtefactViewHolder holder, int position) {
         Artefact artefact = artefacts.get(position);
         holder.textViewArtefactName.setText(artefact.getName());
+        holder.textViewArtefactDescription.setText(artefact.getDescription());
         Glide.with(context).load(artefact.getImageUrl()).into(holder.imageViewArtefact);
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, ArtefactDetailActivity.class);
@@ -55,11 +56,13 @@ public class ArtefactAdapter extends RecyclerView.Adapter<ArtefactAdapter.Artefa
     public static class ArtefactViewHolder extends RecyclerView.ViewHolder {
         ImageView imageViewArtefact;
         TextView textViewArtefactName;
+        TextView textViewArtefactDescription;
 
         public ArtefactViewHolder(@NonNull View itemView) {
             super(itemView);
             imageViewArtefact = itemView.findViewById(R.id.imageViewArtefact);
             textViewArtefactName = itemView.findViewById(R.id.textViewArtefactName);
+            textViewArtefactDescription = itemView.findViewById(R.id.textViewArtefactDescription);
         }
     }
 }
