@@ -1,6 +1,8 @@
 package com.example.historyhike.model;
 
-public class Artefact {
+import java.io.Serializable;
+
+public class Artefact implements Serializable {
     private int id;
     private String name;
     private String description;

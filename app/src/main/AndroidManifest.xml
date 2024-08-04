@@ -54,6 +54,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".view.MuseumActivity"></activity>
+        <activity android:name=".view.ArtefactDetailActivity"></activity>
     </application>
 
 </manifest>

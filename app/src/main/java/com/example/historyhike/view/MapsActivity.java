@@ -130,6 +130,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MapsActivity.this, MuseumActivity.class);
+                // Pass the artefacts list
+                ArrayList<Artefact> artefacts = new ArrayList<>(museumController.getArtefacts());
+                intent.putExtra("artefacts", artefacts);
                 startActivity(intent);
             }
         }); // Open museum when that part of the bootmsheet is clicked

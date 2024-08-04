@@ -20,7 +20,7 @@ public class ApiController {
 
         ArrayList<Objective> path = new ArrayList<>();
         path.add(obj1);
-        path.add(obj2);
+        // path.add(obj2);
 
         Quest quest = new Quest();
         quest.setTitle("Test me");
