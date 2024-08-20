@@ -6,17 +6,22 @@
     android:background="@drawable/museum_background"
     tools:context=".view.MuseumActivity">
 
+    <!-- First Header Layout -->
     <LinearLayout
-        android:id="@+id/museum_layout"
+        android:id="@+id/header_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center">
+        android:layout_gravity="center"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true">
 
         <ImageView
             android:id="@+id/buttonBack"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:src="@drawable/back" />
+            android:src="@drawable/back"
+            android:layout_marginRight="10dp"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -27,17 +32,37 @@
             android:textColor="@color/white" />
     </LinearLayout>
 
+    <!-- Second Header -->
     <LinearLayout
+        android:id="@+id/second_header_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center">
+        android:layout_below="@id/header_layout"
+        android:layout_gravity="center"
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerViewArtefacts"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/buttonBack"
-            android:padding="16dp" />
+        <ImageView
+            android:id="@+id/secondHeaderImage"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/account"
+            android:layout_marginRight="10dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/lora"
+            android:text="Account"
+            android:textSize="40dp"
+            android:textColor="@color/white" />
     </LinearLayout>
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewArtefacts"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/second_header_layout"
+        android:padding="16dp" />
 </RelativeLayout>
