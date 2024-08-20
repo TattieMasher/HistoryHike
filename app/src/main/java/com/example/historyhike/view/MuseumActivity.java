@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,7 +27,7 @@ public class MuseumActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_museum);
 
-        ImageView buttonBack = findViewById(R.id.buttonBack);
+        LinearLayout buttonBack = findViewById(R.id.header_layout);
         buttonBack.setOnClickListener(v -> onBackPressed());
 
         recyclerView = findViewById(R.id.recyclerViewArtefacts);

@@ -1,38 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#A64824"
-    tools:context=".view.RegisterActivity">
+    android:background="@drawable/museum_background"
+    tools:context=".view.MuseumActivity">
 
-    <!-- Logo Text -->
-    <TextView
-        android:id="@+id/tvLogo"
+    <!-- First Header Layout -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/header_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="HistoryHike"
-        android:textColor="#FFFFFF"
-        android:textSize="56sp"
-        android:textStyle="bold"
-        android:fontFamily="@font/lora"
+        android:layout_marginTop="10dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- Tagline Text -->
-    <TextView
-        android:id="@+id/tvTagline"
+        <ImageView
+            android:id="@+id/buttonBack"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/back"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/lora"
+            android:text="My Museum"
+            android:textSize="40dp"
+            android:textColor="@color/white"
+            app:layout_constraintStart_toEndOf="@id/buttonBack"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Second Header Layout -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/account_header"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="SEEK. FIND. CONQUER."
-        android:textColor="#E7D1C3"
-        android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@+id/tvLogo"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/header_layout"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
 
+        <ImageView
+            android:id="@+id/buttonAccount"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/account"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/lora"
+            android:text="Account"
+            android:textSize="40dp"
+            android:textColor="@color/white"
+            app:layout_constraintStart_toEndOf="@id/buttonAccount"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Form fields below the headers -->
     <EditText
         android:id="@+id/etfName"
         android:layout_width="0dp"
@@ -42,8 +82,8 @@
         android:textColorHint="#FFFFFF"
         android:textColor="#FFFFFF"
         android:padding="16dp"
-        android:layout_marginTop="60dp"
-        app:layout_constraintTop_toBottomOf="@+id/tvTagline"
+        android:layout_marginTop="20dp"
+        app:layout_constraintTop_toBottomOf="@id/account_header"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintWidth_percent="0.8" />
@@ -58,7 +98,7 @@
         android:textColor="#FFFFFF"
         android:padding="16dp"
         android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@+id/etfName"
+        app:layout_constraintTop_toBottomOf="@id/etfName"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintWidth_percent="0.8" />
@@ -74,7 +114,7 @@
         android:padding="16dp"
         android:layout_marginTop="16dp"
         android:inputType="textEmailAddress"
-        app:layout_constraintTop_toBottomOf="@+id/etSurname"
+        app:layout_constraintTop_toBottomOf="@id/etSurname"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintWidth_percent="0.8" />
@@ -90,7 +130,7 @@
         android:padding="16dp"
         android:layout_marginTop="16dp"
         android:inputType="textPassword"
-        app:layout_constraintTop_toBottomOf="@+id/etEmail"
+        app:layout_constraintTop_toBottomOf="@id/etEmail"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintWidth_percent="0.8" />
@@ -106,19 +146,19 @@
         android:padding="16dp"
         android:layout_marginTop="16dp"
         android:inputType="textPassword"
-        app:layout_constraintTop_toBottomOf="@+id/etPassword"
+        app:layout_constraintTop_toBottomOf="@id/etPassword"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintWidth_percent="0.8" />
 
     <Button
-        android:id="@+id/btnRegister"
+        android:id="@+id/btnChangeAccount"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="60dp"
         android:backgroundTint="#00C9A9"
         android:padding="16dp"
-        android:text="REGISTER NEW ACCOUNT"
+        android:text="Change account details"
         android:textColor="#FFFFFF"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
