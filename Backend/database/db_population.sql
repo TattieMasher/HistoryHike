@@ -7,8 +7,9 @@ INSERT INTO `user` (`email`, `password_hash`, `first_name`, `surname`) VALUES
 
 -- Quests
 INSERT INTO `quest` (`title`, `description`, `long_description`, `complete_description`) VALUES
-('Burns\' Footsteps', 'Embrace the legacy of Robert Burns, in the streets that first put his words to page.', 'TODO', 'Completed quest description for Burns\' Footsteps'),
-('The Spirit of Kilmarnock', 'Explore the journey of Kilmarnock\'s most famous export.', 'TODO', 'Completed quest description for The Spirit of Kilmarnock');
+('Burns\' Footsteps', 'Embrace the legacy of Robert Burns, in the streets that first put his words to page.', 'Follow in the footsteps of Robert Burns through Kilmarnock, where his literary journey began. This quest leads you to the places that shaped Scotland’s national poet— from the monument honoring his legacy to the very printer that first brought his words to life. Discover the town that shaped Burns and the stories behind his first published works.', 'TODO: Completed quest description for Burns\' Footsteps'),
+('The Spirit of Kilmarnock', 'Explore the journey of Kilmarnock\'s most famous export.', 'Explore the origins of Johnnie Walker Whiskey in the heart of Kilmarnock. From a small grocery store to a global whisky icon, this quest takes you through some of the key sites that shaped the brand’s history. Walk the same streets where John Walker started it all, and see how a local blend became a worldwide symbol of quality, lasting to this day.', 'TODO: Completed quest description for The Spirit of Kilmarnock'),
+('Victory at Loudoun Hill', 'Relive Robert the Bruce''s triumphant stand against English forces at Loudoun Hill, a defining moment in Scotland''s fight for independence.', 'Step onto the historic grounds of Loudoun Hill, where in 1307 Robert the Bruce led a daring and strategic battle that changed the course of Scottish history. Follow the path of the Scottish forces as they outmaneuvered a larger English army using the landscape to their advantage. Experience the sites where bravery and clever tactics secured a crucial victory, inspiring a nation in its quest for freedom.', 'TODO: Completed quest description for TheVictory at Loudon Hill');
 
 -- Objectives
 INSERT INTO `objective` (`latitude`, `longitude`, `name`, `title`, `description`, `image_url`) VALUES
