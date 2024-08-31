@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.util.Base64;
 import java.util.Date;
 import java.util.function.Function;
 
@@ -22,6 +23,11 @@ public class JwtUtils {
 
     private SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
 
+    // Log the key in base64 format for easy comparison
+    private void logKey() {
+        System.out.println("JWT Secret Key: " + Base64.getEncoder().encodeToString(key.getEncoded()));
+    }
+
     public String generateToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
@@ -32,27 +38,33 @@ public class JwtUtils {
     }
 
     public String extractUsername(String token) {
+        logKey();
         return extractClaim(token, Claims::getSubject);
     }
 
     public Date extractExpiration(String token) {
+        logKey();
         return extractClaim(token, Claims::getExpiration);
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        logKey();
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
     private Claims extractAllClaims(String token) {
+        logKey();
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
 
     public boolean isTokenExpired(String token) {
+        logKey();
         return extractExpiration(token).before(new Date());
     }
 
     public boolean validateToken(String token, String username) {
+        logKey();
         return extractUsername(token).equals(username) && !isTokenExpired(token);
     }
 }
