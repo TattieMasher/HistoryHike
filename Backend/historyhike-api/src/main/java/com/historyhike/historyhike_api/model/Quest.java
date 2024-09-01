@@ -24,7 +24,7 @@ public class Quest {
     @JsonManagedReference
     private Artefact artefact;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "quest_objective",
             joinColumns = @JoinColumn(name = "quest_id"),
