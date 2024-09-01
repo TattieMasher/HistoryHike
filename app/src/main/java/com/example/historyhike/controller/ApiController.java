@@ -1,13 +1,64 @@
 package com.example.historyhike.controller;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import com.example.historyhike.model.Artefact;
 import com.example.historyhike.model.Objective;
 import com.example.historyhike.model.Quest;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 public class ApiController {
-    // This will handle all HTTP tasks. For now, it's just used to test application functions
+    private final String BASE_URL = "https://history-hike.alexs-apis.xyz/";
+
+    public interface LoginCallback {
+        void onSuccess(String jwt);
+        void onFailure(String errorMessage);
+    }
+
+    public void login(String email, String password, LoginCallback callback) {
+        new Thread(() -> {
+            try {
+                URL url = new URL(BASE_URL + "auth/login");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setDoOutput(true);
+
+                String inputJson = "{\"email\":\"" + email + "\",\"passwordHash\":\"" + password + "\"}";
+
+                OutputStream os = conn.getOutputStream();
+                os.write(inputJson.getBytes());
+                os.flush();
+
+                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    StringBuilder response = new StringBuilder();
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+
+                    // Notify success on the main thread
+                    new Handler(Looper.getMainLooper()).post(() -> callback.onSuccess(response.toString()));
+                } else {
+                    // Notify failure on the main thread
+                    new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Login failed"));
+                }
+            } catch (Exception e) {
+                // Notify failure on the main thread
+                new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Login failed: " + e.getMessage()));
+            }
+        }).start();
+    }
+
 
     public ArrayList<Quest> fetchTestQuests() {
         ArrayList<Quest> quests = new ArrayList<>();
