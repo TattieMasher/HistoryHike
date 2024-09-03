@@ -40,38 +40,6 @@
             app:layout_constraintBottom_toBottomOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Second Header Layout -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/account_header"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        app:layout_constraintTop_toBottomOf="@id/header_layout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <ImageView
-            android:id="@+id/buttonAccount"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:src="@drawable/account"
-            android:layout_marginEnd="10dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="@font/lora"
-            android:text="Account"
-            android:textSize="40dp"
-            android:textColor="@color/white"
-            app:layout_constraintStart_toEndOf="@id/buttonAccount"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
     <!-- Form fields below the headers -->
     <EditText
         android:id="@+id/etfName"
@@ -83,7 +51,7 @@
         android:textColor="#FFFFFF"
         android:padding="16dp"
         android:layout_marginTop="20dp"
-        app:layout_constraintTop_toBottomOf="@id/account_header"
+        app:layout_constraintTop_toBottomOf="@id/header_layout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintWidth_percent="0.8" />

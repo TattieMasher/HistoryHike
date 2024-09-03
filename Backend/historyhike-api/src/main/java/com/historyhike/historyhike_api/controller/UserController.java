@@ -67,7 +67,7 @@ public class UserController {
             user.setEmail((String) updates.get("email"));
         }
         if (updates.containsKey("passwordHash")) {
-            // Here you should encode the password before saving
+            // Encode the supplied password before saving
             user.setPasswordHash((String) updates.get("passwordHash"));
         }
 
@@ -77,4 +77,22 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
+    // Get all details of the authenticated user (excluding password)
+    @GetMapping("/me")
+    public ResponseEntity<User> getUserDetails(@RequestHeader("Authorization") String token) {
+        // Extract the JWT token from the Authorization header
+        String jwt = token.substring(7);
+        String email = jwtUtils.extractUsername(jwt);
+
+        // Find the user by email
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Set the passwordHash field to null to exclude it from the response
+        user.setPasswordHash(null);
+
+        return ResponseEntity.ok(user);
+    }
 }

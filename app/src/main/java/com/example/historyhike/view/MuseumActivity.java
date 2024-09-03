@@ -1,6 +1,8 @@
 package com.example.historyhike.view;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -29,6 +31,15 @@ public class MuseumActivity extends AppCompatActivity {
 
         LinearLayout buttonBack = findViewById(R.id.header_layout);
         buttonBack.setOnClickListener(v -> onBackPressed());
+
+        LinearLayout buttonAccount = findViewById(R.id.account_header);
+        buttonAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MuseumActivity.this, AccountActivity.class);
+                startActivity(intent);
+            }
+        }); // Open account details change page
 
         recyclerView = findViewById(R.id.recyclerViewArtefacts);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
