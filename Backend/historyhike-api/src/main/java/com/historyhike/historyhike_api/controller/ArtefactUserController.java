@@ -49,20 +49,26 @@ public class ArtefactUserController {
     }
 
     @PostMapping("/complete_quest")
-    public ResponseEntity<ArtefactUser> createArtefactUser(@RequestBody Map<String, Integer> requestBody) {
-        int userId = requestBody.get("userId");
-        int questId = requestBody.get("questId");
+    public ResponseEntity<ArtefactUser> createArtefactUser(@RequestHeader("Authorization") String token, @RequestBody Map<String, Integer> requestBody) {
+        // Extract the JWT token from the Authorization header
+        String jwt = token.substring(7);
+        String email = jwtUtils.extractUsername(jwt);
 
-        User user = userRepository.findById(userId).orElse(null);
+        // Find the user by email
+        User user = userRepository.findByEmail(email).orElse(null);
         if (user == null) {
             return ResponseEntity.badRequest().body(null);
         }
 
+        int questId = requestBody.get("questId");
+
+        // Find the artefact by questId
         Artefact artefact = artefactRepository.findByQuestId(questId);
         if (artefact == null) {
             return ResponseEntity.badRequest().body(null);
         }
 
+        // Create a new ArtefactUser entry
         ArtefactUser artefactUser = new ArtefactUser();
         artefactUser.setUser(user);
         artefactUser.setArtefact(artefact);
