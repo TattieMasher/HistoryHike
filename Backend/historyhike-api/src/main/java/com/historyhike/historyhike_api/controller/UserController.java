@@ -2,11 +2,13 @@ package com.historyhike.historyhike_api.controller;
 
 import com.historyhike.historyhike_api.model.User;
 import com.historyhike.historyhike_api.repository.UserRepository;
+import com.historyhike.historyhike_api.security.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @CrossOrigin("*")
@@ -14,6 +16,8 @@ import java.util.List;
 public class UserController {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private JwtUtils jwtUtils;
 
     @GetMapping("/all")
     private ResponseEntity<List<User>> getAll() {
@@ -39,4 +43,38 @@ public class UserController {
         User savedUser = userRepository.save(user);
         return ResponseEntity.ok(savedUser);
     }
+
+    @PutMapping("/update")
+    public ResponseEntity<User> updateUser(@RequestHeader("Authorization") String token, @RequestBody Map<String, Object> updates) {
+        // Extract the JWT token from the Authorization header
+        String jwt = token.substring(7);
+        String email = jwtUtils.extractUsername(jwt);
+
+        // Find the user by email
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        // Update fields if provided
+        if (updates.containsKey("firstName")) {
+            user.setFirstName((String) updates.get("firstName"));
+        }
+        if (updates.containsKey("surname")) {
+            user.setSurname((String) updates.get("surname"));
+        }
+        if (updates.containsKey("email")) {
+            user.setEmail((String) updates.get("email"));
+        }
+        if (updates.containsKey("passwordHash")) {
+            // Here you should encode the password before saving
+            user.setPasswordHash((String) updates.get("passwordHash"));
+        }
+
+        // Save updated user
+        User updatedUser = userRepository.save(user);
+
+        return ResponseEntity.ok(updatedUser);
+    }
+
 }
