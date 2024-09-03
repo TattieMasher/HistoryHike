@@ -2,10 +2,14 @@ package com.example.historyhike.controller;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.example.historyhike.model.Artefact;
 import com.example.historyhike.model.Objective;
 import com.example.historyhike.model.Quest;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -59,6 +63,89 @@ public class ApiController {
         }).start();
     }
 
+    public interface FetchQuestsCallback {
+        void onSuccess(ArrayList<Quest> quests);
+        void onFailure(String errorMessage);
+    }
+
+    public void fetchUncompletedQuests(String jwt, FetchQuestsCallback callback) {
+        new Thread(() -> {
+            try {
+                URL url = new URL(BASE_URL + "quest/uncompleted");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Authorization", "Bearer " + jwt);
+                conn.setRequestProperty("Content-Type", "application/json");
+
+                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    StringBuilder response = new StringBuilder();
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+
+                    // Parse the JSON response
+                    ArrayList<Quest> quests = parseQuestsFromJson(response.toString());
+
+                    // Notify success on the main thread
+                    new Handler(Looper.getMainLooper()).post(() -> callback.onSuccess(quests));
+                } else {
+                    // Notify failure on the main thread
+                    new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Failed to fetch quests"));
+                }
+            } catch (Exception e) {
+                Log.e("ApiController", "Error fetching quests", e);
+                // Notify failure on the main thread
+                new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Error: " + e.getMessage()));
+            }
+        }).start();
+    }
+
+    private ArrayList<Quest> parseQuestsFromJson(String jsonResponse) {
+        ArrayList<Quest> quests = new ArrayList<>();
+        try {
+            JSONArray jsonArray = new JSONArray(jsonResponse);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject questJson = jsonArray.getJSONObject(i);
+                Quest quest = new Quest();
+                quest.setTitle(questJson.getString("title"));
+                quest.setDescription(questJson.getString("description"));
+
+                // Parse objectives
+                JSONArray objectivesArray = questJson.getJSONArray("objectives");
+                ArrayList<Objective> objectives = new ArrayList<>();
+                for (int j = 0; j < objectivesArray.length(); j++) {
+                    JSONObject objectiveJson = objectivesArray.getJSONObject(j);
+                    Objective objective = new Objective(
+                            objectiveJson.getInt("id"),
+                            objectiveJson.getDouble("latitude"),
+                            objectiveJson.getDouble("longitude"),
+                            objectiveJson.getString("name"),
+                            objectiveJson.getString("description")
+                    );
+                    objectives.add(objective);
+                }
+                quest.setQuestPath(objectives);
+
+                // Parse artefact (reward)
+                JSONObject artefactJson = questJson.getJSONObject("artefact");
+                Artefact artefact = new Artefact(
+                        artefactJson.getInt("id"),
+                        artefactJson.getString("name"),
+                        artefactJson.getString("description"),
+                        artefactJson.getString("imageUrl")
+                );
+                quest.setReward(artefact);
+
+                quests.add(quest);
+            }
+        } catch (Exception e) {
+            Log.e("ApiController", "Error parsing quests JSON", e);
+        }
+        return quests;
+    }
 
     public ArrayList<Quest> fetchTestQuests() {
         ArrayList<Quest> quests = new ArrayList<>();

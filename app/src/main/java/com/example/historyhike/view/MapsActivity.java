@@ -3,6 +3,7 @@ package com.example.historyhike.view;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -103,7 +104,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void testQuests(){
-        questController.setAvailableQuests(apiController.fetchTestQuests());
+        SharedPreferences sharedPreferences = getSharedPreferences("HistoryHikePrefs", MODE_PRIVATE);
+        String jwt = sharedPreferences.getString("JWT_TOKEN", null);
+
+        if (jwt != null) {
+            apiController.fetchUncompletedQuests(jwt, new ApiController.FetchQuestsCallback() {
+                @Override
+                public void onSuccess(ArrayList<Quest> quests) {
+                    questController.setAvailableQuests(quests);
+                    initialiseMapWithQuests(); // Display quests on the map
+                    addQuestsToSheet();        // Display quests in the BottomSheet
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    Toast.makeText(MapsActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Toast.makeText(this, "No JWT token found, please log in again", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void setUpContentView() {
