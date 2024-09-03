@@ -114,6 +114,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     questController.setAvailableQuests(quests);
                     initialiseMapWithQuests(); // Display quests on the map
                     addQuestsToSheet();        // Display quests in the BottomSheet
+                    for (Quest q : quests) {
+                        for( Objective o : q.getQuestPath()) {
+                            Log.e("IMAGE DEBUG","Image URL: " + o.getImageURL());
+                        }
+                    }
                 }
 
                 @Override
@@ -123,6 +128,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             });
         } else {
             Toast.makeText(this, "No JWT token found, please log in again", Toast.LENGTH_SHORT).show();
+            finish();
         }
     }
 
@@ -305,7 +311,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 TextView description = objectiveView.findViewById(R.id.scroll_description);
 
                 title.setText(objective.getName());
-                description.setText(objective.getDescription());
+
+                if(objective.isComplete()) {
+                    description.setText(objective.getDescription());
+                }
 
                 // If this objective is complete or we have already found the next objective,
                 if (objective.isComplete() || foundNextObjective) {

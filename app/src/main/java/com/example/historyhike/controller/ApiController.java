@@ -112,6 +112,8 @@ public class ApiController {
                 Quest quest = new Quest();
                 quest.setTitle(questJson.getString("title"));
                 quest.setDescription(questJson.getString("description"));
+                quest.setLongDescription(questJson.getString("longDescription"));
+                quest.setFinishDescription(questJson.getString("completeDescription"));
 
                 // Parse objectives
                 JSONArray objectivesArray = questJson.getJSONArray("objectives");
@@ -125,19 +127,29 @@ public class ApiController {
                             objectiveJson.getString("name"),
                             objectiveJson.getString("description")
                     );
+
+                    // Properly parse and set the imageUrl
+                    if (objectiveJson.has("imageUrl") && !objectiveJson.isNull("imageUrl")) {
+                        objective.setImageURL(objectiveJson.getString("imageUrl"));
+                    } else {
+                        objective.setImageURL(null); // Explicitly set to null if not present
+                    }
+
                     objectives.add(objective);
                 }
                 quest.setQuestPath(objectives);
 
                 // Parse artefact (reward)
-                JSONObject artefactJson = questJson.getJSONObject("artefact");
-                Artefact artefact = new Artefact(
-                        artefactJson.getInt("id"),
-                        artefactJson.getString("name"),
-                        artefactJson.getString("description"),
-                        artefactJson.getString("imageUrl")
-                );
-                quest.setReward(artefact);
+                if (questJson.has("artefact") && !questJson.isNull("artefact")) {
+                    JSONObject artefactJson = questJson.getJSONObject("artefact");
+                    Artefact artefact = new Artefact(
+                            artefactJson.getInt("id"),
+                            artefactJson.getString("name"),
+                            artefactJson.getString("description"),
+                            artefactJson.getString("imageUrl")
+                    );
+                    quest.setReward(artefact);
+                }
 
                 quests.add(quest);
             }
@@ -146,6 +158,7 @@ public class ApiController {
         }
         return quests;
     }
+
 
     public ArrayList<Quest> fetchTestQuests() {
         ArrayList<Quest> quests = new ArrayList<>();
