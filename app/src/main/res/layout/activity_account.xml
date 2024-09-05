@@ -37,7 +37,8 @@
             android:textColor="@color/white"
             app:layout_constraintStart_toEndOf="@id/buttonBack"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginLeft="10dp"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Form fields below the headers -->
