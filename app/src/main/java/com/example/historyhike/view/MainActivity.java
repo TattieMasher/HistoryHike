@@ -13,12 +13,16 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.historyhike.R;
 import com.example.historyhike.controller.ApiController;
+import com.example.historyhike.model.Artefact;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
     private EditText etEmail;
     private EditText etPassword;
     private Button btnLogin;
+    private Button btnRegister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
+        btnRegister = findViewById(R.id.btnRegister);
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,5 +68,13 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         });
+
+        btnRegister.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
+                startActivity(intent);
+            }
+        }); // Open Registration page
     }
 }

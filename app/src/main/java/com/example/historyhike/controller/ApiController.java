@@ -26,6 +26,54 @@ public class ApiController {
         void onFailure(String errorMessage);
     }
 
+    public void register(String email, String password, String fName, String sName, RegisterCallback callback) {
+        new Thread(() -> {
+            try {
+                URL url = new URL(BASE_URL + "auth/register"); // Update the URL to the correct endpoint
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setDoOutput(true);
+
+                // Correctly format the JSON body for registration
+                String inputJson = "{\"email\":\"" + email + "\","
+                        + "\"passwordHash\":\"" + password + "\","
+                        + "\"firstName\":\"" + fName + "\","
+                        + "\"surname\":\"" + sName + "\"}";
+
+                OutputStream os = conn.getOutputStream();
+                os.write(inputJson.getBytes());
+                os.flush();
+                os.close();
+
+                // Check the response code
+                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    StringBuilder response = new StringBuilder();
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+
+                    // Notify success on the main thread
+                    new Handler(Looper.getMainLooper()).post(() -> callback.onSuccess(response.toString()));
+                } else {
+                    // Notify failure on the main thread
+                    new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Registration failed"));
+                }
+            } catch (Exception e) {
+                // Notify failure on the main thread
+                new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Registration failed: " + e.getMessage()));
+            }
+        }).start();
+    }
+
+    public interface RegisterCallback {
+        void onSuccess(String jwt);
+        void onFailure(String errorMessage);
+    }
+
     public void login(String email, String password, LoginCallback callback) {
         new Thread(() -> {
             try {
