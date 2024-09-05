@@ -155,16 +155,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         museumLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MapsActivity.this, MuseumActivity.class);
-                // Handle null artefacts list
-                ArrayList<Artefact> artefacts = museumController.getArtefacts();
-                if (artefacts == null) {
-                    artefacts = new ArrayList<>();
+                SharedPreferences sharedPreferences = getSharedPreferences("HistoryHikePrefs", MODE_PRIVATE);
+                String jwt = sharedPreferences.getString("JWT_TOKEN", null);
+
+                if (jwt != null) {
+                    ApiController apiController = new ApiController();
+                    apiController.fetchObtainedArtefacts(jwt, new ApiController.FetchArtefactsCallback() {
+                        @Override
+                        public void onSuccess(ArrayList<Artefact> artefacts) {
+                            Intent intent = new Intent(MapsActivity.this, MuseumActivity.class);
+                            intent.putExtra("artefacts", new ArrayList<>(artefacts));
+                            startActivity(intent);
+                        }
+
+                        @Override
+                        public void onFailure(String errorMessage) {
+                            Toast.makeText(MapsActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    Toast.makeText(MapsActivity.this, "Please log in to view artefacts", Toast.LENGTH_SHORT).show();
                 }
-                intent.putExtra("artefacts", new ArrayList<>(artefacts));
-                startActivity(intent);
             }
-        }); // Open museum when that part of the bootmsheet is clicked
+        });     // Open museum when that part of the bootmsheet is clicked
 
 
         scrollTitle.setText(getString(R.string.scroll_quest_title)); // Already set in XML anyway, but just to be sure

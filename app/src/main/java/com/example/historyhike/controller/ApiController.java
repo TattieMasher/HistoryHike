@@ -29,7 +29,7 @@ public class ApiController {
     public void register(String email, String password, String fName, String sName, RegisterCallback callback) {
         new Thread(() -> {
             try {
-                URL url = new URL(BASE_URL + "auth/register"); // Update the URL to the correct endpoint
+                URL url = new URL(BASE_URL + "auth/register");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Content-Type", "application/json");
@@ -251,6 +251,65 @@ public class ApiController {
         return quests;
     }
 
+    public interface FetchArtefactsCallback {
+        void onSuccess(ArrayList<Artefact> artefacts);
+        void onFailure(String errorMessage);
+    }
+
+    public void fetchObtainedArtefacts(String jwt, FetchArtefactsCallback callback) {
+        new Thread(() -> {
+            try {
+                URL url = new URL(BASE_URL + "artefact_user/obtained");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Authorization", "Bearer " + jwt);
+                conn.setRequestProperty("Content-Type", "application/json");
+
+                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    StringBuilder response = new StringBuilder();
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+
+                    // Parse the JSON response
+                    ArrayList<Artefact> artefacts = parseArtefactsFromJson(response.toString());
+
+                    // Notify success on the main thread
+                    new Handler(Looper.getMainLooper()).post(() -> callback.onSuccess(artefacts));
+                } else {
+                    // Notify failure on the main thread
+                    new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Failed to fetch artefacts"));
+                }
+            } catch (Exception e) {
+                Log.e("ApiController", "Error fetching artefacts", e);
+                // Notify failure on the main thread
+                new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Error: " + e.getMessage()));
+            }
+        }).start();
+    }
+
+    private ArrayList<Artefact> parseArtefactsFromJson(String jsonResponse) {
+        ArrayList<Artefact> artefacts = new ArrayList<>();
+        try {
+            JSONArray jsonArray = new JSONArray(jsonResponse);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject artefactJson = jsonArray.getJSONObject(i);
+                Artefact artefact = new Artefact(
+                        artefactJson.getInt("id"),
+                        artefactJson.getString("name"),
+                        artefactJson.getString("description"),
+                        artefactJson.getString("imageUrl")
+                );
+                artefacts.add(artefact);
+            }
+        } catch (Exception e) {
+            Log.e("ApiController", "Error parsing artefacts JSON", e);
+        }
+        return artefacts;
+    }
 
     public ArrayList<Quest> fetchTestQuests() {
         ArrayList<Quest> quests = new ArrayList<>();
@@ -276,5 +335,4 @@ public class ApiController {
         quests.add(quest);
         return quests;
     }
-
 }

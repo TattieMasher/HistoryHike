@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.historyhike.R;
+import com.example.historyhike.controller.ApiController;
 import com.example.historyhike.model.Artefact;
 
 import java.util.ArrayList;
@@ -32,15 +33,6 @@ public class MuseumActivity extends AppCompatActivity {
         LinearLayout buttonBack = findViewById(R.id.header_layout);
         buttonBack.setOnClickListener(v -> onBackPressed());
 
-        LinearLayout buttonAccount = findViewById(R.id.account_header);
-        buttonAccount.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MuseumActivity.this, AccountActivity.class);
-                startActivity(intent);
-            }
-        }); // Open account details change page
-
         recyclerView = findViewById(R.id.recyclerViewArtefacts);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -52,5 +44,14 @@ public class MuseumActivity extends AppCompatActivity {
 
         adapter = new ArtefactAdapter(artefacts, this);
         recyclerView.setAdapter(adapter);
+
+        LinearLayout buttonAccount = findViewById(R.id.account_header);
+        buttonAccount.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MuseumActivity.this, AccountActivity.class);
+                startActivity(intent);
+            }
+        }); // Open account details change page
     }
 }
