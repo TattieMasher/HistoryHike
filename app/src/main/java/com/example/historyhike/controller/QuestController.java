@@ -1,5 +1,8 @@
 package com.example.historyhike.controller;
 
+import static android.content.Context.MODE_PRIVATE;
+
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.util.Log;
 import android.widget.Toast;
@@ -89,24 +92,48 @@ public class QuestController implements ProximityListener {
         }
     }
 
-
+    // TODO: review this, because this is not very MVC...
     public void completeQuest() {
         Log.d("QuestDebug", "Completing quest now");
         mapsActivity.setLastObjComplete(true);
+
         if (currentQuest != null) {
+            // Add the artefact to the museum
             mapsActivity.getMuseumController().addArtefact(currentQuest.getReward());
             currentQuest.setState(Quest.QuestState.COMPLETED);
-            // museum.addArtefact(currentQuest.getReward()); TODO: Currently breaks app flow
+
+            // Retrieve JWT from SharedPreferences
+            SharedPreferences sharedPreferences = mapsActivity.getSharedPreferences("HistoryHikePrefs", MODE_PRIVATE);
+            String jwt = sharedPreferences.getString("JWT_TOKEN", null);
+
+            if (jwt != null) {
+                // Call API to complete the quest
+                mapsActivity.getApiController().completeQuest(jwt, currentQuest.getId(), new ApiController.CompleteQuestCallback() {
+                    @Override
+                    public void onSuccess() {
+                        Log.d("QuestDebug", "Quest completion API success.");
+                    }
+
+                    @Override
+                    public void onFailure(String errorMessage) {
+                        Log.e("QuestDebug", "Quest completion API failed: " + errorMessage);
+                        // Handle failure (optional: retry, show a message, etc.)
+                    }
+                });
+            } else {
+                Log.e("QuestDebug", "JWT token not found. Unable to complete quest.");
+            }
+
+            // Reset current quest
             currentQuest = null;
             currentObjectiveIndex = -1;
             Log.d("QuestDebug", "Quest completed, state reset");
-
         } else {
             Log.d("QuestDebug", "Attempted to complete a null quest");
         }
-        mapsActivity.cancelQuest(); // TODO: Revise this? This is currently just used to reset the maps UI so that no quest-in-progress related elements are there.
-    }
 
+        mapsActivity.cancelQuest();  // Reset the UI
+    }
 
 
     public void cancelQuest() {

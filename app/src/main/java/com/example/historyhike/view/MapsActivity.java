@@ -276,13 +276,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         String title = questController.getCurrentObjective().getName();
         String description = questController.getCurrentObjective().getDescription();
         String imageURL = questController.getCurrentObjective().getImageURL();
-        // TODO: New lines don't work
 
         ObjectiveCompleteDialogFragment dialogFragment = ObjectiveCompleteDialogFragment.newInstance(title, description, imageURL);
+
+        // Set a listener for when the objective completion dialog is dismissed
+        dialogFragment.setOnDismissListener(dialog -> {
+            if (questController.getCurrentQuest() == null && isLastObjComplete) {
+                // Show artefact dialog only when objective dialog is dismissed
+                showArtefactDialog();
+            }
+        });
+
         dialogFragment.show(getSupportFragmentManager(), "objectiveCompleteDialog");
         updateObjectivesView();
         isLastObjComplete = false;
     }
+
 
     public void showArtefactDialog() {
         if(isLastObjComplete) {
@@ -399,6 +408,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         initialiseMapWithQuests();  // Return map to showing quests, not current quest's objectives
         addQuestsToSheet();         // Add quests back to the BottomSheet
         recenterMapOnUser();        // Move the map to the user's location
+
+        TextView scrollTitle = findViewById(R.id.scroll_title); // Reset scroll title to "Nearyby Quests"
+        scrollTitle.setText(R.string.scroll_quest_title);
     }
 
     private void cancelButtonVisible(boolean visible) {
@@ -440,5 +452,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 isFirstLocated = true; // Flag variable to stop location updates re-centering EVERY time
             }
         });
+    }
+
+    // TODO: review this, because this is not very MVC...
+    public ApiController getApiController() {
+        return apiController;
     }
 }

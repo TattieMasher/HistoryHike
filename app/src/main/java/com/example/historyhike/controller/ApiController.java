@@ -103,6 +103,49 @@ public class ApiController {
         }).start();
     }
 
+    // Interface for quest completion callback
+    public interface CompleteQuestCallback {
+        void onSuccess();
+        void onFailure(String errorMessage);
+    }
+
+    public void completeQuest(String jwt, int questId, CompleteQuestCallback callback) {
+        new Thread(() -> {
+            try {
+                // API URL for completing quest
+                URL url = new URL(BASE_URL + "artefact_user/complete_quest");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Authorization", "Bearer " + jwt);
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setDoOutput(true);
+
+                // JSON body with questId
+                JSONObject jsonBody = new JSONObject();
+                jsonBody.put("questId", questId);
+
+                // Send the JSON request body
+                OutputStream os = conn.getOutputStream();
+                os.write(jsonBody.toString().getBytes());
+                os.flush();
+                os.close();
+
+                // Check the response code
+                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    // Notify success on the main thread
+                    new Handler(Looper.getMainLooper()).post(callback::onSuccess);
+                } else {
+                    // Notify failure on the main thread
+                    new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Failed to complete quest"));
+                }
+            } catch (Exception e) {
+                Log.e("ApiController", "Error completing quest", e);
+                // Notify failure on the main thread
+                new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Error: " + e.getMessage()));
+            }
+        }).start();
+    }
+
     private ArrayList<Quest> parseQuestsFromJson(String jsonResponse) {
         ArrayList<Quest> quests = new ArrayList<>();
         try {
@@ -110,6 +153,7 @@ public class ApiController {
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject questJson = jsonArray.getJSONObject(i);
                 Quest quest = new Quest();
+                quest.setId(questJson.getInt("id"));
                 quest.setTitle(questJson.getString("title"));
                 quest.setDescription(questJson.getString("description"));
                 quest.setLongDescription(questJson.getString("longDescription"));

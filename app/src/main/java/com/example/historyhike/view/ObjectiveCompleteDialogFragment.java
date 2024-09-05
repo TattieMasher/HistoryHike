@@ -1,7 +1,5 @@
 package com.example.historyhike.view;
 
-import android.app.Activity;
-import android.app.Dialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -20,6 +18,8 @@ import com.example.historyhike.R;
 import com.google.android.material.button.MaterialButton;
 
 public class ObjectiveCompleteDialogFragment extends DialogFragment {
+
+    private DialogInterface.OnDismissListener onDismissListener; // Listener for dismiss event
 
     // Now using imageURL string
     public static ObjectiveCompleteDialogFragment newInstance(String title, String description, String imageURL) {
@@ -57,12 +57,15 @@ public class ObjectiveCompleteDialogFragment extends DialogFragment {
     }
 
     @Override
-    public void onDismiss(DialogInterface dialogInterface) {
-        super.onDismiss(dialogInterface);
-        Activity activity = getActivity();
-        if (activity instanceof MapsActivity) {
-            ((MapsActivity) activity).showArtefactDialog();
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+        if (onDismissListener != null) {
+            onDismissListener.onDismiss(dialog);  // Trigger the custom dismiss listener
         }
     }
 
+    // Method to set the dismiss listener
+    public void setOnDismissListener(DialogInterface.OnDismissListener onDismissListener) {
+        this.onDismissListener = onDismissListener;
+    }
 }
