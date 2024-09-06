@@ -5,9 +5,12 @@ import com.historyhike.historyhike_api.repository.UserRepository;
 import com.historyhike.historyhike_api.security.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +25,9 @@ public class UserController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private JavaMailSender mailSender;
+
 
     @GetMapping("/all")
     private ResponseEntity<List<User>> getAll() {
@@ -99,4 +105,52 @@ public class UserController {
 
         return ResponseEntity.ok(user);
     }
+
+    // Method to handle password reset
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> requestBody) {
+        String email = requestBody.get("email");
+
+        // Find user by email
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null) {
+            return ResponseEntity.badRequest().body("No user found with this email.");
+        }
+
+        // Generate a new random password
+        String newPassword = generateRandomPassword(8); // Generate an 8-character password
+
+        // Send the new password to the user's email
+        sendEmail(user.getEmail(), newPassword);
+
+        // Update the user's password in the database
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        return ResponseEntity.ok("A new password has been sent to your email.");
+    }
+
+    // Helper method to generate a random password
+    private String generateRandomPassword(int length) {
+        String charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        SecureRandom random = new SecureRandom();
+        StringBuilder password = new StringBuilder(length);
+
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(charSet.length());
+            password.append(charSet.charAt(index));
+        }
+        return password.toString();
+    }
+
+    // Helper method to send an email
+    private void sendEmail(String to, String newPassword) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);  // recipient's email
+        message.setFrom("hello@alex-mccaughran.net");
+        message.setSubject("Password Reset Request");
+        message.setText("Your new password is: " + newPassword);
+        mailSender.send(message);
+    }
+
 }
