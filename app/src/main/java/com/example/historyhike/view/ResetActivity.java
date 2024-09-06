@@ -43,7 +43,7 @@ public class ResetActivity extends AppCompatActivity {
                 apiController.resetPassword(emailInput, new ApiController.ResetPasswordCallback() {
                     @Override
                     public void onSuccess(String message) {
-                        Toast.makeText(ResetActivity.this, "Password reset email sent!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ResetActivity.this, "Password reset email sent! Check your spam.", Toast.LENGTH_LONG).show();
                     }
 
                     @Override

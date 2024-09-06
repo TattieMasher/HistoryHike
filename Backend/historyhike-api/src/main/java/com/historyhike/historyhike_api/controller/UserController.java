@@ -148,7 +148,7 @@ public class UserController {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);  // recipient's email
         message.setFrom("hello@alex-mccaughran.net");
-        message.setSubject("Password Reset Request");
+        message.setSubject("HistoryHike: Password Reset Request");
         message.setText("Your new password is: " + newPassword);
         mailSender.send(message);
     }
