@@ -399,6 +399,52 @@ public class ApiController {
         }).start();
     }
 
+    public interface ResetPasswordCallback {
+        void onSuccess(String message);
+        void onFailure(String errorMessage);
+    }
+
+    public void resetPassword(String email, ResetPasswordCallback callback) {
+        new Thread(() -> {
+            try {
+                URL url = new URL(BASE_URL + "user/reset-password");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setDoOutput(true);
+
+                // Create the JSON body for the request
+                String inputJson = "{\"email\":\"" + email + "\"}";
+
+                OutputStream os = conn.getOutputStream();
+                os.write(inputJson.getBytes());
+                os.flush();
+                os.close();
+
+                // Check the response code
+                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    StringBuilder response = new StringBuilder();
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+
+                    // Notify success on the main thread
+                    new Handler(Looper.getMainLooper()).post(() -> callback.onSuccess("Success"));
+                } else {
+                    // Notify failure on the main thread
+                    new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Failed to reset password"));
+                }
+            } catch (Exception e) {
+                // Notify failure on the main thread
+                new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Error: " + e.getMessage()));
+            }
+        }).start();
+    }
+
+
     public ArrayList<Quest> fetchTestQuests() {
         ArrayList<Quest> quests = new ArrayList<>();
 
