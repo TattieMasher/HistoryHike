@@ -7,6 +7,7 @@ import android.util.Log;
 import com.example.historyhike.model.Artefact;
 import com.example.historyhike.model.Objective;
 import com.example.historyhike.model.Quest;
+import com.example.historyhike.model.User;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -309,6 +310,93 @@ public class ApiController {
             Log.e("ApiController", "Error parsing artefacts JSON", e);
         }
         return artefacts;
+    }
+
+    public interface FetchUserCallback {
+        void onSuccess(User user);
+        void onFailure(String errorMessage);
+    }
+
+    public void fetchUserDetails(String jwt, FetchUserCallback callback) {
+        new Thread(() -> {
+            try {
+                URL url = new URL(BASE_URL + "user/me");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Authorization", "Bearer " + jwt);
+                conn.setRequestProperty("Content-Type", "application/json");
+
+                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                    StringBuilder response = new StringBuilder();
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    }
+                    in.close();
+
+                    // Parse the JSON response
+                    JSONObject userJson = new JSONObject(response.toString());
+                    User user = new User(
+                            userJson.getInt("id"),
+                            userJson.getString("email"),
+                            userJson.getString("firstName"),
+                            userJson.getString("surname")
+                    );
+
+                    // Notify success on the main thread
+                    new Handler(Looper.getMainLooper()).post(() -> callback.onSuccess(user));
+                } else {
+                    // Notify failure on the main thread
+                    new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Failed to fetch user details"));
+                }
+            } catch (Exception e) {
+                Log.e("ApiController", "Error fetching user details", e);
+                // Notify failure on the main thread
+                new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Error: " + e.getMessage()));
+            }
+        }).start();
+    }
+
+    public interface UpdateUserCallback {
+        void onSuccess();
+        void onFailure(String errorMessage);
+    }
+
+    public void updateUserDetails(String jwt, String firstName, String surname, String email, String password, UpdateUserCallback callback) {
+        new Thread(() -> {
+            try {
+                URL url = new URL(BASE_URL + "user/update");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("PUT");
+                conn.setRequestProperty("Authorization", "Bearer " + jwt);
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setDoOutput(true);
+
+                // Create JSON body with updated user details
+                JSONObject jsonBody = new JSONObject();
+                jsonBody.put("firstName", firstName);
+                jsonBody.put("surname", surname);
+                jsonBody.put("email", email);
+                jsonBody.put("passwordHash", password); // Update the passwordHash field
+
+                // Send the JSON request body
+                OutputStream os = conn.getOutputStream();
+                os.write(jsonBody.toString().getBytes());
+                os.flush();
+                os.close();
+
+                // Check the response code
+                if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    new Handler(Looper.getMainLooper()).post(callback::onSuccess);
+                } else {
+                    new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Failed to update user details"));
+                }
+            } catch (Exception e) {
+                Log.e("ApiController", "Error updating user details", e);
+                new Handler(Looper.getMainLooper()).post(() -> callback.onFailure("Error: " + e.getMessage()));
+            }
+        }).start();
     }
 
     public ArrayList<Quest> fetchTestQuests() {

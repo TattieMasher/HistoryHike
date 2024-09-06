@@ -5,6 +5,7 @@ import com.historyhike.historyhike_api.repository.UserRepository;
 import com.historyhike.historyhike_api.security.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +19,9 @@ public class UserController {
     private UserRepository userRepository;
     @Autowired
     private JwtUtils jwtUtils;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping("/all")
     private ResponseEntity<List<User>> getAll() {
@@ -68,7 +72,7 @@ public class UserController {
         }
         if (updates.containsKey("passwordHash")) {
             // Encode the supplied password before saving
-            user.setPasswordHash((String) updates.get("passwordHash"));
+            user.setPasswordHash(passwordEncoder.encode((String) updates.get("passwordHash")));
         }
 
         // Save updated user
